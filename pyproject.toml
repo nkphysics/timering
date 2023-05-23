@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "timering"
+version = "0.0.1"
+description = ""
+authors = [
+    { name="Nicholas Kuechel", email="njkuechel@protonmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "streamlit >= 1.11.1",
+    "pandas >= 1.4.3",
+    "plotly >= 5.10.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest >= 7.2.0",
+    "pytest-cov >= 3.0.0",
+    "maturin >= 0.12.19",
+    "flake8 >= 6.0.0",
+]
+
+[tool.setuptools]
+packages = ["timering"]
