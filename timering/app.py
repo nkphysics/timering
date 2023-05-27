@@ -25,13 +25,21 @@ with st.sidebar:
     dbpath = st.text_input("Local database path", value=pargs.database)
     dbpath = pathlib.Path(dbpath).resolve()
     plottype = st.radio("Timing Evolution Plot Type", ["Line", "Scatter"])
-    intmode = st.selectbox("Interval mode selection:",
-                           options=["all", "full", "gti"]
-                           )
     show_df = st.radio(
         "Show Data Table",
         ["Off", "On"],
     )
+    with st.expander("Timing Evolution Filters"):
+        st.markdown("Interval Modes:")
+        set1, set2 = st.columns(2)
+        with set1:
+            xteintmode = st.selectbox("XTE",
+                                      options=["all", "full", "gti"]
+                                      )
+        with set2:
+            nicerintmode = st.selectbox("NICER",
+                                        options=["all", "full", "gti"]
+                                        )
 
 st.session_state.show_df = show_df
 
@@ -39,8 +47,24 @@ con = sqlite3.connect(dbpath)
 table_in = pd.read_sql_query("SELECT * FROM nu_results", con)
 table_in["TIME"] = pd.to_datetime(table_in["TIME"])
 table_in = table_in.sort_values(by="TIME")
-if intmode != "all":
-    table_in = table_in.loc[table_in["MODE"] == intmode]
+
+
+def querymission(mission):
+    mtable = table_in.loc[table_in["MISSION"] == mission.upper()]
+    return mtable
+
+
+def filter_intmode(table, intmode):
+    if intmode != "all":
+        table = table.loc[table["MODE"] == intmode.lower()]
+    return table
+
+
+nitable = querymission("NICER")
+nitable = filter_intmode(nitable, nicerintmode)
+xtetable = querymission("XTE")
+xtetable = filter_intmode(xtetable, xteintmode)
+table_in = pd.merge(xtetable, nitable, how="outer")
 
 
 def tevo_plot(plottype):
@@ -65,8 +89,8 @@ def tevo_plot(plottype):
             markers=True,
         )
     fig.update_layout(xaxis_title="Time", yaxis_title=r"Spin Frequency $\nu$")
-    fig.update_xaxes(showgrid=False)
-    fig.update_yaxes(showgrid=False)
+    fig.update_xaxes(showgrid=True)
+    fig.update_yaxes(showgrid=True)
     return fig
 
 
