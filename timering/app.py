@@ -40,7 +40,7 @@ with st.sidebar:
             nicerintmode = st.selectbox("NICER",
                                         options=["all", "full", "gti"]
                                         )
-        st.markdown(r"Error (m$hz$):")
+        st.markdown(r"Error ($hz$):")
         set3, set4 = st.columns(2)
         with set3:
             minerr = st.text_input("Min", value=0.0)
@@ -86,11 +86,11 @@ table_in = filtermax(table_in, "NU_ERR", maxerr)
 table_in = filtermin(table_in, "NU_ERR", minerr)
 
 
-def tevo_plot(plottype):
+def tevo_plot(table, plottype):
     fig = 0
     if plottype == "Scatter":
         fig = px.scatter(
-            table_in,
+            table,
             x="TIME",
             y="NU",
             title="Timing Evolution",
@@ -99,7 +99,7 @@ def tevo_plot(plottype):
         )
     else:
         fig = px.line(
-            table_in,
+            table,
             x="TIME",
             y="NU",
             title="Timing Evolution",
@@ -113,6 +113,11 @@ def tevo_plot(plottype):
     return fig
 
 
-st.plotly_chart(tevo_plot(plottype))
+st.plotly_chart(tevo_plot(table_in, plottype))
+
+total, tnicer, txte = st.columns(3)
+total.metric("Total", len(table_in["NU"]))
+tnicer.metric("NICER", len(table_in.loc[table_in["MISSION"] == "NICER"]))
+txte.metric("XTE", len(table_in.loc[table_in["MISSION"] == "XTE"]))
 if st.session_state.show_df == "On":
     crab_table = st.dataframe(table_in)
