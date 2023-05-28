@@ -40,6 +40,13 @@ with st.sidebar:
             nicerintmode = st.selectbox("NICER",
                                         options=["all", "full", "gti"]
                                         )
+        st.markdown(r"Error (m$hz$):")
+        set3, set4 = st.columns(2)
+        with set3:
+            minerr = st.text_input("Min", value=0.0)
+        with set4:
+            maxerr = st.text_input("Max", value=1.0)
+
 
 st.session_state.show_df = show_df
 
@@ -60,11 +67,23 @@ def filter_intmode(table, intmode):
     return table
 
 
+def filtermax(table, column, maxbound):
+    table = table.loc[table[column] <= float(maxbound)]
+    return table
+
+
+def filtermin(table, column, minbound):
+    table = table.loc[table[column] >= float(minbound)]
+    return table
+
+
 nitable = querymission("NICER")
 nitable = filter_intmode(nitable, nicerintmode)
 xtetable = querymission("XTE")
 xtetable = filter_intmode(xtetable, xteintmode)
 table_in = pd.merge(xtetable, nitable, how="outer")
+table_in = filtermax(table_in, "NU_ERR", maxerr)
+table_in = filtermin(table_in, "NU_ERR", minerr)
 
 
 def tevo_plot(plottype):
@@ -88,7 +107,7 @@ def tevo_plot(plottype):
             error_y="NU_ERR",
             markers=True,
         )
-    fig.update_layout(xaxis_title="Time", yaxis_title=r"Spin Frequency $\nu$")
+    fig.update_layout(xaxis_title="Time", yaxis_title=r"Spin Frequency (hz)")
     fig.update_xaxes(showgrid=True)
     fig.update_yaxes(showgrid=True)
     return fig
