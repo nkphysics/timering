@@ -81,6 +81,8 @@ with st.sidebar:
             maxerr = st.text_input("Max Error", value=1.0)
         table_in = filtermax(table_in, "NU_ERR", maxerr)
         table_in = filtermin(table_in, "NU_ERR", minerr)
+        minzn2 = st.text_input("Min $Z_n^2$", value=30.0)
+        table_in = filtermin(table_in, "ZN2", minzn2)
         st.markdown(r"$\nu$ Gaussian Fit Error (hz)")
         set5, set6 = st.columns(2)
         with set5:
