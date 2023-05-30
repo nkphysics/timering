@@ -89,15 +89,22 @@ with st.sidebar:
             maxgerr = st.text_input("Max Gaussian Error", value=1.0)
         table_in = filtermax(table_in, "G_NU_ERR", maxgerr)
         table_in = filtermin(table_in, "G_NU_ERR", mingerr)
-
         st.markdown(r"Exposure (s)")
-        set5, set6 = st.columns(2)
-        with set5:
-            mingerr = st.text_input("Min Exposure", value=0.0)
-        with set6:
-            maxgerr = st.text_input("Max Exposure", value=1000000)
-        table_in = filtermax(table_in, "EXPOSURE", maxgerr)
-        table_in = filtermin(table_in, "EXPOSURE", mingerr)
+        set7, set8 = st.columns(2)
+        with set7:
+            minexpo = st.text_input("Min Exposure", value=0.0)
+        with set8:
+            maxexpo = st.text_input("Max Exposure", value=1000000)
+        table_in = filtermax(table_in, "EXPOSURE", maxexpo)
+        table_in = filtermin(table_in, "EXPOSURE", minexpo)
+        st.markdown(r"Arrival Times (counts)")
+        set9, set10 = st.columns(2)
+        with set9:
+            minats = st.text_input("Min ATs", value=0.0)
+        with set10:
+            maxats = st.text_input("Max ATs", value=1000000000)
+        table_in = filtermax(table_in, "ATS", maxats)
+        table_in = filtermin(table_in, "ATS", minats)
 st.session_state.show_df = show_df
 
 
