@@ -4,6 +4,8 @@ import argparse
 import pathlib
 import plotly.express as px
 import sqlite3
+import numpy as np
+from astropy.time import Time
 
 
 p = argparse.ArgumentParser(description="Set local database")
@@ -53,7 +55,8 @@ with st.sidebar:
     )
 
 con = sqlite3.connect(dbpath)
-table_in = pd.read_sql_query("SELECT * FROM nu_results", con)
+table_in = pd.read_sql_query("SELECT * FROM nu_results", con,
+                             parse_dates=["TIME"])
 table_in["TIME"] = pd.to_datetime(table_in["TIME"])
 table_in = table_in.sort_values(by="TIME")
 with st.sidebar:
@@ -145,3 +148,49 @@ tnicer.metric("NICER", len(table_in.loc[table_in["MISSION"] == "NICER"]))
 txte.metric("XTE", len(table_in.loc[table_in["MISSION"] == "XTE"]))
 if st.session_state.show_df == "On":
     crab_table = st.dataframe(table_in)
+
+
+def boxcarfit(df, tpts=1, lpts=1, order=1):
+    """
+    Performs a boxcar fit by least squares.
+    Requires time and corresponding spin dataframe
+    Returns boxcar fitting coefficients
+    """
+    df = df.reset_index(drop=True)
+    coeffs = {"TIME": [], "DNU": []}
+    for num, _ in enumerate(df["TIME"], start=tpts):
+        try:
+            times = []
+            spins = []
+            for j in range(1, tpts):
+                times.append(df["TIME"][num - j])
+                spins.append(df["NU"][num - j])
+            for j in range(1, lpts):
+                times.append(df["TIME"][num + j])
+                spins.append(df["NU"][num + j])
+            times = Time(times, format="datetime").mjd
+            twoorder = np.polynomial.polynomial.polyfit(times, spins, order)
+            coeffs["TIME"].append(df["TIME"][num])
+            coeffs["DNU"].append(twoorder[1])
+        except KeyError:
+            break
+    return coeffs
+
+
+with st.sidebar:
+    with st.expander(r"$\delta \nu$ Fitting"):
+        trail = st.slider("# of Trailing Boxcar Points", 2, 10, 2)
+        lead = st.slider("# of Leading Boxcar Points", 2, 10, 2)
+        order = st.number_input("Order of Polynomial", min_value=1,
+                                max_value=3, step=1)
+
+nuresiduals = boxcarfit(table_in, tpts=trail, lpts=lead, order=order)
+nures_plot = px.line(
+            x=nuresiduals["TIME"],
+            y=nuresiduals["DNU"],
+            title="Nu Residuals",
+            markers=True,
+        )
+nures_plot.update_layout(xaxis_title="Time",
+                         yaxis_title=r"Nu Residual")
+st.plotly_chart(nures_plot, order=order)
