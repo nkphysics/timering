@@ -111,6 +111,7 @@ with st.sidebar:
         table_in = filtermax(table_in, "ATS", maxats)
         table_in = filtermin(table_in, "ATS", minats)
 st.session_state.show_df = show_df
+st.markdown(r"## $\nu$ Evolution")
 
 
 def tevo_plot(table, plottype):
@@ -120,7 +121,6 @@ def tevo_plot(table, plottype):
             table,
             x="TIME",
             y="NU",
-            title="Timing Evolution",
             color="MISSION",
             error_y="NU_ERR",
         )
@@ -129,7 +129,6 @@ def tevo_plot(table, plottype):
             table,
             x="TIME",
             y="NU",
-            title="Timing Evolution",
             color="MISSION",
             error_y="NU_ERR",
             markers=True,
@@ -185,10 +184,10 @@ with st.sidebar:
                                 max_value=3, step=1)
 
 nuresiduals = boxcarfit(table_in, tpts=trail, lpts=lead, order=order)
+st.markdown(r"## $\delta \nu$ Fitting")
 nures_plot = px.line(
             x=nuresiduals["TIME"],
             y=nuresiduals["DNU"],
-            title="Nu Residuals",
             markers=True,
         )
 nures_plot.update_layout(xaxis_title="Time",
