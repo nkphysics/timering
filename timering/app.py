@@ -168,9 +168,13 @@ def boxcarfit(df, tpts=1, lpts=1, order=1):
                 times.append(df["TIME"][num + j])
                 spins.append(df["NU"][num + j])
             times = Time(times, format="datetime").mjd
-            twoorder = np.polynomial.polynomial.polyfit(times, spins, order)
+            polycoes = np.polynomial.polynomial.polyfit(times, spins, order)
+            poly = np.poly1d(polycoes)
             coeffs["TIME"].append(df["TIME"][num])
-            coeffs["DNU"].append(twoorder[1])
+            time0 = Time(df["TIME"][num], format="datetime").mjd
+            prediction = poly(time0)
+            diff = df["NU"][num] - prediction
+            coeffs["DNU"].append(diff)
         except KeyError:
             break
     return coeffs
