@@ -177,19 +177,25 @@ def boxcarfit(df, tpts=1, lpts=1, order=1):
 
 
 with st.sidebar:
-    with st.expander(r"$\delta \nu$ Fitting"):
+    with st.expander(r"$\delta \nu$ Fitting from $\nu$"):
+        show_nufit = st.radio("Show Plot",
+                              ["Off", "On"])
+        st.session_state.show_nufit = show_nufit
         trail = st.slider("# of Trailing Boxcar Points", 2, 10, 2)
         lead = st.slider("# of Leading Boxcar Points", 2, 10, 2)
         order = st.number_input("Order of Polynomial", min_value=1,
                                 max_value=3, step=1)
 
-nuresiduals = boxcarfit(table_in, tpts=trail, lpts=lead, order=order)
-st.markdown(r"## $\delta \nu$ Fitting")
-nures_plot = px.line(
-            x=nuresiduals["TIME"],
-            y=nuresiduals["DNU"],
-            markers=True,
-        )
-nures_plot.update_layout(xaxis_title="Time",
-                         yaxis_title=r"Nu Residual")
-st.plotly_chart(nures_plot, order=order)
+if "show_nufit" not in st.session_state:
+    st.session_state.show_nufit = "Off"
+if st.session_state.show_nufit == "On":
+    st.markdown(r"## $\delta \nu$ Fitting of $\nu$ Data")
+    nuresiduals = boxcarfit(table_in, tpts=trail, lpts=lead, order=order)
+    nures_plot = px.line(
+                x=nuresiduals["TIME"],
+                y=nuresiduals["DNU"],
+                markers=True,
+            )
+    nures_plot.update_layout(xaxis_title="Time",
+                             yaxis_title=r"Nu Residual")
+    st.plotly_chart(nures_plot, order=order)
