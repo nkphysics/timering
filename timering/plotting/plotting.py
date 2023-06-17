@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import plotly.express as px
 
 
 def gaussian(x, a, mu, sig):
@@ -29,7 +30,9 @@ def result_plot(result_hdu, *, title=None):
         )
     hm_range = hm * np.ones(len(fwhm))
     a.plot(fwhm, hm_range, label="fwhm", linestyle="dotted")
-    a.plot(data["Frequency"], data["Z12"], label=r"$Z_n^2$ Result", color="cyan")
+    a.plot(data["Frequency"], data["Z12"],
+           label=r"$Z_n^2$ Result",
+           color="cyan")
     a.plot(data["Frequency"], gfit, label="Gaussian Fit", linestyle="dashed")
     plt.legend()
     return a
@@ -45,3 +48,28 @@ def spin_curve_plot(plc_hdu, *, title=None):
     a.set_xlabel(r"Phase ($\phi$)")
     a.set_ylabel("Arrival Times")
     return a
+
+
+def evo_plot(table, plottype):
+    fig = 0
+    if plottype == "Scatter":
+        fig = px.scatter(
+            table,
+            x="TIME",
+            y="NU",
+            color="MISSION",
+            error_y="NU_ERR",
+        )
+    else:
+        fig = px.line(
+            table,
+            x="TIME",
+            y="NU",
+            color="MISSION",
+            error_y="NU_ERR",
+            markers=True,
+        )
+    fig.update_layout(xaxis_title="Time", yaxis_title=r"Spin Frequency (hz)")
+    fig.update_xaxes(showgrid=True)
+    fig.update_yaxes(showgrid=True)
+    return fig

@@ -6,6 +6,7 @@ import plotly.express as px
 import sqlite3
 import numpy as np
 from astropy.time import Time
+import plotting
 
 
 p = argparse.ArgumentParser(description="Set local database")
@@ -113,33 +114,7 @@ with st.sidebar:
 st.session_state.show_df = show_df
 st.markdown(r"## $\nu$ Evolution")
 
-
-def tevo_plot(table, plottype):
-    fig = 0
-    if plottype == "Scatter":
-        fig = px.scatter(
-            table,
-            x="TIME",
-            y="NU",
-            color="MISSION",
-            error_y="NU_ERR",
-        )
-    else:
-        fig = px.line(
-            table,
-            x="TIME",
-            y="NU",
-            color="MISSION",
-            error_y="NU_ERR",
-            markers=True,
-        )
-    fig.update_layout(xaxis_title="Time", yaxis_title=r"Spin Frequency (hz)")
-    fig.update_xaxes(showgrid=True)
-    fig.update_yaxes(showgrid=True)
-    return fig
-
-
-st.plotly_chart(tevo_plot(table_in, plottype))
+st.plotly_chart(plotting.evo_plot(table_in, plottype))
 
 total, tnicer, txte = st.columns(3)
 total.metric("Total", len(table_in["NU"]))
