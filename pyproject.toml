@@ -14,6 +14,9 @@ dependencies = [
     "streamlit >= 1.11.1",
     "pandas >= 1.4.3",
     "plotly >= 5.10.0",
+    "astropy >= 5.2",
+    "matplotlib >= 3.7.1",
+    "numpy >= 1.24.0"
 ]
 
 [project.optional-dependencies]
