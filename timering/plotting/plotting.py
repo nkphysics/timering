@@ -1,13 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import plotly.express as px
+from astropy.io import fits
+import pathlib
 
 
 def gaussian(x, a, mu, sig):
     return a * np.exp(-((x - mu) ** 2) / (2 * sig**2))
 
 
-def result_plot(result_hdu, *, title=None):
+def resultplot(result_hdu, *, title=None):
     """
     Simple function to quickly display Zn2 results
     """
@@ -35,10 +37,10 @@ def result_plot(result_hdu, *, title=None):
            color="cyan")
     a.plot(data["Frequency"], gfit, label="Gaussian Fit", linestyle="dashed")
     plt.legend()
-    return a
+    return fig
 
 
-def spin_curve_plot(plc_hdu, *, title=None):
+def spincurveplot(plc_hdu, *, title=None):
     hist = plc_hdu.data["Phase Rate"]
     plt.style.use("dark_background")
     fig, a = plt.subplots()
@@ -47,7 +49,7 @@ def spin_curve_plot(plc_hdu, *, title=None):
     a.set_title(title)
     a.set_xlabel(r"Phase ($\phi$)")
     a.set_ylabel("Arrival Times")
-    return a
+    return fig
 
 
 def evo_plot(table, plottype):
@@ -73,3 +75,48 @@ def evo_plot(table, plottype):
     fig.update_xaxes(showgrid=True)
     fig.update_yaxes(showgrid=True)
     return fig
+
+
+class Result:
+    def __init__(self, resultfile):
+        self.resultfile = pathlib.Path(resultfile).resolve()
+        self.hdul = self.open_twr()
+        self.phdr = self.get_pheader()
+
+    def open_twr(self):
+        return fits.open(self.resultfile)
+
+    def get_hdu(self, index):
+        hdu = self.hdul[index]
+        return hdu.header, hdu
+
+    def get_pheader(self):
+        phdr = self.hdul[0].header
+        return phdr
+
+    def get_title(self, header):
+        return (f"{self.phdr['MISSION']} " +
+                f"{self.phdr['OBSID']} @ " +
+                f"{header['NU_DT']}")
+
+    def close_file(self):
+        return self.hdul.close()
+
+
+def obsid_plots(resultfile):
+    """
+    Plots all measurement results and phase curves
+    from a specfied result file
+    """
+    obsid = Result(resultfile)
+    plots = []
+    for i in range(1, len(obsid.hdul)):
+        header, table = obsid.get_hdu(i)
+        title = obsid.get_title(header)
+        if header["EXTNAME"] == "PHASE CURVE":
+            plot = spincurveplot(table, title=title)
+            plots.append(plot)
+        else:
+            plot = resultplot(obsid.hdul[i], title=title)
+            plots.append(plot)
+    return plots

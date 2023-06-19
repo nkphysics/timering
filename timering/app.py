@@ -178,3 +178,23 @@ if st.session_state.show_nufit == "On":
     nures_plot.update_layout(xaxis_title="Time",
                              yaxis_title=r"Nu Residual")
     st.plotly_chart(nures_plot, order=order)
+
+
+nif = pd.read_sql("SELECT NICER.OBSID, NICER.TWR_FILE FROM NICER " +
+                  "WHERE NICER.TWR_FILE IS NOT NULL", con)
+xtef = pd.read_sql("SELECT XTE.OBSID, XTE.TWR_FILE FROM XTE " +
+                   "WHERE XTE.TWR_FILE IS NOT NULL", con)
+resdf = pd.merge(nif, xtef, how="outer")
+
+st.markdown("Individual Measurements")
+obsid = st.selectbox("OBSID", resdf["OBSID"])
+obsid_filt = resdf.loc[resdf["OBSID"] == obsid]
+obsid_filt.reset_index(drop=True, inplace=True)
+rplots = plotting.obsid_plots(obsid_filt["TWR_FILE"][0])
+sluicing, phasecurve = st.columns(2)
+for num, i in enumerate(rplots):
+    if num % 2 == 0:
+        with sluicing:
+            st.pyplot(rplots[num])
+        with phasecurve:
+            st.pyplot(rplots[num + 1])
