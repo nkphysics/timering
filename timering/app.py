@@ -193,9 +193,14 @@ obsid = st.selectbox("OBSID", resdf["OBSID"])
 obsid_filt = resdf.loc[resdf["OBSID"] == obsid]
 obsid_filt.reset_index(drop=True, inplace=True)
 rplots = plotting.obsid_plots(obsid_filt["TWR_FILE"][0])
-sluicing, phasecurve = st.columns(2)
 for num, i in enumerate(rplots):
     if num % 2 == 0:
+        if num <= 1:
+            st.markdown("### Full")
+        else:
+            subindex = int(num - (num / 2.0))
+            st.markdown(f"### Interval {num - subindex}")
+        sluicing, phasecurve = st.columns(2)
         with sluicing:
             st.pyplot(rplots[num])
         with phasecurve:
