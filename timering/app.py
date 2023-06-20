@@ -185,8 +185,10 @@ nif = pd.read_sql("SELECT NICER.OBSID, NICER.TWR_FILE FROM NICER " +
 xtef = pd.read_sql("SELECT XTE.OBSID, XTE.TWR_FILE FROM XTE " +
                    "WHERE XTE.TWR_FILE IS NOT NULL", con)
 resdf = pd.merge(nif, xtef, how="outer")
+resdf = pd.merge(resdf, table_in, how="inner", on="OBSID")
+resdf = resdf.drop_duplicates(subset=["OBSID"])
 
-st.markdown("Individual Measurements")
+st.markdown("# Individual Measurements")
 obsid = st.selectbox("OBSID", resdf["OBSID"])
 obsid_filt = resdf.loc[resdf["OBSID"] == obsid]
 obsid_filt.reset_index(drop=True, inplace=True)
