@@ -49,7 +49,7 @@ with st.sidebar:
     st.markdown("# Timering")
     dbpath = st.text_input("Local database path", value=pargs.database)
     dbpath = pathlib.Path(dbpath).resolve()
-    plottype = st.radio("Timing Evolution Plot Type", ["Line", "Scatter"])
+    plottype = st.radio("Nu Evolution Plot Type", ["Line", "Scatter"])
     show_df = st.radio(
         "Show Data Table",
         ["Off", "On"],
@@ -121,7 +121,15 @@ total.metric("Total", len(table_in["NU"]))
 tnicer.metric("NICER", len(table_in.loc[table_in["MISSION"] == "NICER"]))
 txte.metric("XTE", len(table_in.loc[table_in["MISSION"] == "XTE"]))
 if st.session_state.show_df == "On":
-    crab_table = st.dataframe(table_in)
+    crab_table = st.dataframe(table_in, use_container_width=True)
+    st.markdown(r"""
+                **NOTE:**
+
+                Data presneted in this table rounds to $10^{-4}$ Hz by default.
+                However, in most cases measurements of $\nu$ are obtained
+                at resolutions of $<10^{-5}$ Hz. Selecting single cells of the
+                dataframe will display the full values.
+                """)
 
 
 def boxcarfit(df, tpts=1, lpts=1, order=1):
@@ -211,24 +219,24 @@ with st.expander("More Info On Individual Results"):
     st.markdown("""
                 Individual Results are processed in two different modes, FULL and GTI.
                 It will be best to start with GTI mode
-                
+
                 ### GTI Mode
-                
+
                 GTI mode may be misleading from the name.
                 Results processed in GTI mode are measurements optained from a singular exposure
                 interval during an observation. This is much more applicable to missions like
                 NICER that group multiple exposure intervals into a single .evt datafile.
-                To explain as simply as possible, missions in orbit do not get continueous 
+                To explain as simply as possible, missions in orbit do not get continueous
                 exposure from a source due to the missions' orbit, as well as the orbits of other
                 objects that may impeded the view of a source by the mission. This is dealt with
                 by not collecting, or clearing out data when the source is not in view. This
                 leads to periods across an observation of for example 1200s of exposure followed
-                by >2000s of nothing before another exposure. In some cases this short duration 
+                by >2000s of nothing before another exposure. In some cases this short duration
                 between exposures can be lead to noticable differences in measurements of spin
                 Therefore each interval is isolated and measured on its own.
-                
+
                 ### Full Mode
-                
+
                 Full mode measurements are obtained by taking all photon arrival times from
                 an observation and using them to obtain a single measurement of spin. This is
                 done disregarding total observation exposure or the number of exposure intervals.
@@ -236,9 +244,9 @@ with st.expander("More Info On Individual Results"):
                 measurement results. But, for sources in which it is harder to obtain timing
                 measurements, the full mode can be useful in obtaining something as opposed to
                 nothing.
-                
+
                 DO NOTE:
-                
+
                 Observations or .evt files with only one exposure interval will only be processed
                 in full mode. This is very much so the case with XTE results since XTE .evt files
                 generally come in the form of one exposure interval per .evt file.
