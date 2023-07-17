@@ -2,11 +2,12 @@ import streamlit as st
 import pandas as pd
 import argparse
 import pathlib
-import plotly.express as px
+import plotly.graph_objects as go
 import sqlite3
 import numpy as np
 from astropy.time import Time
 import plotting
+from astroquery.heasarc import Heasarc
 
 
 p = argparse.ArgumentParser(description="Set local database")
@@ -42,6 +43,22 @@ def filtermin(table, column, minbound):
     return table
 
 
+def getcrabtime():
+    """
+    Retrieves the CRABTIME database (Crab Pulsar Monthly
+    Ephemeris from Jodrell Bank) from HEASARC
+    """
+    heasarc = Heasarc()
+    crabtime = heasarc.query_object(object_name='PSR B0531+21', mission='crabtime')
+    jbcrab = crabtime.to_pandas()
+    jbcrab.rename(columns={"MJD": "TIME", "NU_ERROR": "NU_ERR"}, inplace=True)
+    jbcrab["TIME"] = Time(jbcrab["TIME"], format="mjd").to_datetime()
+    jbcrab.drop('RA', axis=1, inplace=True)
+    jbcrab.drop('DEC', axis=1, inplace=True)
+    jbcrab.drop('SEARCH_OFFSET_', axis=1, inplace=True)
+    return jbcrab
+
+
 if "show_df" not in st.session_state:
     st.session_state.show_df = "Off"
 
@@ -54,6 +71,7 @@ with st.sidebar:
         "Show Data Table",
         ["Off", "On"],
     )
+
 
 con = sqlite3.connect(dbpath)
 table_in = pd.read_sql_query("SELECT * FROM nu_results", con,
@@ -151,10 +169,10 @@ def boxcarfit(df, tpts=1, lpts=1, order=1):
                 times.append(df["TIME"][num + j])
                 spins.append(df["NU"][num + j])
             times = Time(times, format="datetime").mjd
+            time0 = Time(df["TIME"][num], format="datetime").mjd
             polycoes = np.polynomial.polynomial.polyfit(times, spins, order)
             poly = np.poly1d(polycoes)
             coeffs["TIME"].append(df["TIME"][num])
-            time0 = Time(df["TIME"][num], format="datetime").mjd
             prediction = poly(time0)
             diff = df["NU"][num] - prediction
             coeffs["DNU"].append(diff)
@@ -167,6 +185,14 @@ with st.sidebar:
     with st.expander(r"$\delta \nu$ Fitting from $\nu$"):
         show_nufit = st.radio("Show Plot",
                               ["Off", "On"])
+        set1, set2 = st.columns(2)
+        with set1:
+            addcrabtime = st.radio("Include CRABTIME",
+                                   ["Off", "On"])
+        with set2:
+            addxray = st.radio("Include X-Ray",
+                               ["Off", "On"],
+                               index=1)
         st.session_state.show_nufit = show_nufit
         trail = st.slider("# of Trailing Boxcar Points", 2, 10, 2)
         lead = st.slider("# of Leading Boxcar Points", 2, 10, 2)
@@ -178,15 +204,21 @@ if "show_nufit" not in st.session_state:
 if st.session_state.show_nufit == "On":
     st.divider()
     st.markdown(r"## $\delta \nu$ Fitting of $\nu$ Data")
-    nuresiduals = boxcarfit(table_in, tpts=trail, lpts=lead, order=order)
-    nures_plot = px.line(
-                x=nuresiduals["TIME"],
-                y=nuresiduals["DNU"],
-                markers=True,
-            )
-    nures_plot.update_layout(xaxis_title="Time",
-                             yaxis_title=r"Nu Residual")
-    st.plotly_chart(nures_plot, order=order)
+    dnuplot = go.Figure()
+    if addcrabtime == "On":
+        jbcrab = getcrabtime()
+        radiodnu = boxcarfit(jbcrab, tpts=trail, lpts=lead, order=order)
+        dnuplot.add_trace(go.Scatter(x=radiodnu["TIME"],
+                                     y=radiodnu["DNU"],
+                                     name='Radio'))
+    if addxray == "On":
+        nuresiduals = boxcarfit(table_in, tpts=trail, lpts=lead, order=order)
+        dnuplot.add_trace(go.Scatter(x=nuresiduals["TIME"],
+                                     y=nuresiduals["DNU"],
+                                     name='X-Ray'))
+    dnuplot.update_layout(xaxis_title="Time",
+                          yaxis_title=r"Nu Residual")
+    st.plotly_chart(dnuplot, order=order)
 
 
 nif = pd.read_sql("SELECT NICER.OBSID, NICER.TWR_FILE FROM NICER " +
