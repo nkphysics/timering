@@ -150,7 +150,8 @@ if st.session_state.show_df == "On":
                 """)
 
 
-def boxcarfit(df, tpts=1, lpts=1, order=1):
+def boxcarfit(df, tpts=1, lpts=1, order=1,
+              mode="Difference"):
     """
     Performs a boxcar fit by least squares.
     Requires time and corresponding spin dataframe
@@ -171,11 +172,14 @@ def boxcarfit(df, tpts=1, lpts=1, order=1):
             times = Time(times, format="datetime").mjd
             time0 = Time(df["TIME"][num], format="datetime").mjd
             polycoes = np.polynomial.polynomial.polyfit(times, spins, order)
-            poly = np.poly1d(polycoes)
             coeffs["TIME"].append(df["TIME"][num])
-            prediction = poly(time0)
-            diff = df["NU"][num] - prediction
-            coeffs["DNU"].append(diff)
+            if mode == "Difference":
+                poly = np.poly1d(polycoes)
+                prediction = poly(time0)
+                diff = df["NU"][num] - prediction
+                coeffs["DNU"].append(diff)
+            elif mode == "Coefficient":
+                coeffs["DNU"].append(polycoes[1])
         except KeyError:
             break
     return coeffs
@@ -183,13 +187,15 @@ def boxcarfit(df, tpts=1, lpts=1, order=1):
 
 with st.sidebar:
     with st.expander(r"$\delta \nu$ Fitting from $\nu$"):
-        show_nufit = st.radio("Show Plot",
-                              ["Off", "On"])
         set1, set2 = st.columns(2)
         with set1:
+            show_nufit = st.radio("Show Plot",
+                                  ["Off", "On"])
             addcrabtime = st.radio("Include CRABTIME",
                                    ["Off", "On"])
         with set2:
+            rmode = st.radio("Residual Mode",
+                             ["Difference", "Coefficient"])
             addxray = st.radio("Include X-Ray",
                                ["Off", "On"],
                                index=1)
@@ -207,12 +213,16 @@ if st.session_state.show_nufit == "On":
     dnuplot = go.Figure()
     if addcrabtime == "On":
         jbcrab = getcrabtime()
-        radiodnu = boxcarfit(jbcrab, tpts=trail, lpts=lead, order=order)
+        radiodnu = boxcarfit(jbcrab, tpts=trail,
+                             lpts=lead, order=order,
+                             mode=rmode)
         dnuplot.add_trace(go.Scatter(x=radiodnu["TIME"],
                                      y=radiodnu["DNU"],
                                      name='Radio'))
     if addxray == "On":
-        nuresiduals = boxcarfit(table_in, tpts=trail, lpts=lead, order=order)
+        nuresiduals = boxcarfit(table_in, tpts=trail,
+                                lpts=lead, order=order,
+                                mode=rmode)
         dnuplot.add_trace(go.Scatter(x=nuresiduals["TIME"],
                                      y=nuresiduals["DNU"],
                                      name='X-Ray'))
