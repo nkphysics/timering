@@ -38,3 +38,18 @@ def iresult_info():
             generally come in the form of one exposure interval per .evt file.
             """)
     return info
+
+
+def tableinfo():
+    """
+    Information for dataframe dropdown about rounding
+    """
+    info = (r"""
+            **NOTE:**
+
+            Data presneted in this table rounds to $10^{-4}$ Hz by default.
+            However, in most cases measurements of $\nu$ are obtained
+            at resolutions of $<10^{-5}$ Hz. Selecting single cells of the
+            dataframe will display the full values.
+            """)
+    return info

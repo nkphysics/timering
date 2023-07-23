@@ -142,14 +142,7 @@ tnicer.metric("NICER", len(table_in.loc[table_in["MISSION"] == "NICER"]))
 txte.metric("XTE", len(table_in.loc[table_in["MISSION"] == "XTE"]))
 if st.session_state.show_df == "On":
     crab_table = st.dataframe(table_in, use_container_width=True)
-    st.markdown(r"""
-                **NOTE:**
-
-                Data presneted in this table rounds to $10^{-4}$ Hz by default.
-                However, in most cases measurements of $\nu$ are obtained
-                at resolutions of $<10^{-5}$ Hz. Selecting single cells of the
-                dataframe will display the full values.
-                """)
+    st.markdown(messages.tableinfo())
 
 
 def boxcarfit(df, tpts=1, lpts=1, order=1,
