@@ -53,3 +53,29 @@ def tableinfo():
             dataframe will display the full values.
             """)
     return info
+
+
+def crabtime_credit():
+    """
+    Citation for CRABTIME and JB Radio for the Crab
+    """
+    info = ("""
+            **Credit**
+
+            Radio timing data for the Crab Pulsar (PSR B0531+21) comes from 
+            the *Crab Pulsar Monthly Ephemeris* covering a timespan of Feb 15, 1982 
+            to the present which was created Dr. Andrew Lyne and multiple 
+            collaborators at Jodrell Bank Observatory in the UK, and was accessed
+            via the HEASARC's CRABTIME database where the HEASARC created two new 
+            parameters which were not present in the original Jodrell Bank tables, 
+            the pulsar period and its first derivative.
+
+            **References**
+
+            Lyne, A.G., Jordan, C.A., Roberts, M.E., 
+            "Jodrell Bank Crab Pulsar Timing Results, 
+            Monthly Ephemeris", http://www.jb.man.ac.uk/~pulsar/crab.html, 
+            University of Manchester, Jodrell Bank Observatory, Macclesfield, 
+            Cheshire, SK11 9DL, UK.
+            """)
+    return info

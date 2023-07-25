@@ -224,7 +224,8 @@ if st.session_state.show_nufit == "On":
     dnuplot.update_layout(xaxis_title="Time",
                           yaxis_title=r"Nu Residual")
     st.plotly_chart(dnuplot, order=order)
-
+    if addcrabtime == "On":
+        st.markdown(messages.crabtime_credit())
 
 nif = pd.read_sql("SELECT NICER.OBSID, NICER.TWR_FILE FROM NICER " +
                   "WHERE NICER.TWR_FILE IS NOT NULL", con)
