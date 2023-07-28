@@ -255,3 +255,6 @@ for num, i in enumerate(rplots):
             st.pyplot(rplots[num + 1])
 with st.expander("More Info On Individual Results"):
     st.markdown(messages.iresult_info())
+
+st.divider()
+st.markdown(messages.poweredby())

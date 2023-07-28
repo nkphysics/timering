@@ -79,3 +79,37 @@ def crabtime_credit():
             Cheshire, SK11 9DL, UK.
             """)
     return info
+
+
+def poweredby():
+    """
+    Message acknowledging all of the packages uses in development
+    """
+    info = ("""
+            This is powered by the following packages. 
+
+            If you find this useful in any way please make sure to give
+            credit to all the listed software packages (In no particular order).
+            (Software listed without DOIs just means I could not find one. Reach out if you know of one please!)
+
+            - Astropy 
+            [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8136839.svg)](https://doi.org/10.5281/zenodo.8136839)
+
+            - Astroquery
+            [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5804082.svg)](https://doi.org/10.5281/zenodo.5804082)
+
+            - Matplotlib
+            [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8118151.svg)](https://doi.org/10.5281/zenodo.8118151)
+
+            - Numpy
+            [![Nature Paper](https://img.shields.io/badge/DOI-10.1038%2Fs41586--020--2649--2-blue)](https://doi.org/10.1038/s41586-020-2649-2)
+
+            - Pandas
+            [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3509134.svg)](https://doi.org/10.5281/zenodo.3509134)
+
+            - Plotly
+            - Sqlite3
+            - Streamlit
+
+            """)
+    return info
