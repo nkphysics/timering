@@ -227,10 +227,18 @@ if st.session_state.show_nufit == "On":
     if addcrabtime == "On":
         st.markdown(messages.crabtime_credit())
 
-nif = pd.read_sql("SELECT NICER.OBSID, NICER.TWR_FILE FROM NICER " +
-                  "WHERE NICER.TWR_FILE IS NOT NULL", con)
-xtef = pd.read_sql("SELECT XTE.OBSID, XTE.TWR_FILE FROM XTE " +
-                   "WHERE XTE.TWR_FILE IS NOT NULL", con)
+try:
+    nif = pd.read_sql("SELECT NICER.OBSID, NICER.TWR_FILE FROM NICER " +
+                      "WHERE NICER.TWR_FILE IS NOT NULL", con)
+except pd.errors.DatabaseError:
+    nif = pd.DataFrame({"OBSID": []})
+
+try:
+    xtef = pd.read_sql("SELECT XTE.OBSID, XTE.TWR_FILE FROM XTE " +
+                       "WHERE XTE.TWR_FILE IS NOT NULL", con)
+except pd.errors.DatabaseError:
+    xtef = pd.DataFrame({"OBSID": []})
+
 resdf = pd.merge(nif, xtef, how="outer")
 resdf = pd.merge(resdf, table_in, how="inner", on="OBSID")
 resdf = resdf.drop_duplicates(subset=["OBSID"])
