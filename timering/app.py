@@ -12,16 +12,19 @@ from astroquery.heasarc import Heasarc
 import logging
 import sys
 
-p = argparse.ArgumentParser(description="Set local database")
 
-p.add_argument("--database",
-               "-db",
-               default="",
-               type=str,
-               help="Local path to .twdb"
-               )
+def parseargs():
+    p = argparse.ArgumentParser(description="Set local database")
 
-pargs = p.parse_args()
+    p.add_argument("--database",
+                   "-db",
+                   default="",
+                   type=str,
+                   help="Local path to .twdb"
+                   )
+
+    pargs = p.parse_args()
+    return pargs
 
 
 def querymission(table_in, mission):
@@ -272,4 +275,5 @@ def main(pargs: argparse.Namespace):
 
 
 if __name__ == "__main__":
+    pargs = parseargs()
     main(pargs)
