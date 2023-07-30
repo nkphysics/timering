@@ -68,7 +68,6 @@ with st.sidebar:
     st.markdown("# Timering")
     dbpath = st.text_input("Local database path", value=pargs.database)
     dbpath = pathlib.Path(dbpath).resolve()
-    plottype = st.radio("Nu Evolution Plot Type", ["Line", "Scatter"])
     show_df = st.radio(
         "Show Data Table",
         ["Off", "On"],
@@ -82,6 +81,11 @@ table_in["TIME"] = pd.to_datetime(table_in["TIME"])
 table_in = table_in.sort_values(by="TIME")
 with st.sidebar:
     with st.expander("Timing Evolution Filters"):
+        set0, set00 = st.columns(2)
+        with set0:
+            plottype = st.radio("Nu Plot Type", ["Line", "Scatter"])
+        with set00:
+            pass
         st.markdown("Interval Modes:")
         set1, set2 = st.columns(2)
         with set1:
