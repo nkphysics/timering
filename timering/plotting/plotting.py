@@ -52,23 +52,28 @@ def spincurveplot(plc_hdu, *, title=None):
     return fig
 
 
-def evo_plot(table, plottype):
+def evo_plot(table, plottype, datatype):
     fig = 0
+    nu = "NU"
+    nuerr = "NU_ERR"
+    if datatype == "Gaussian":
+        nu = "G_NU"
+        nuerr = "G_NU_ERR"
     if plottype == "Scatter":
         fig = px.scatter(
             table,
             x="TIME",
-            y="NU",
+            y=nu,
             color="MISSION",
-            error_y="NU_ERR",
+            error_y=nuerr,
         )
     else:
         fig = px.line(
             table,
             x="TIME",
-            y="NU",
+            y=nu,
             color="MISSION",
-            error_y="NU_ERR",
+            error_y=nuerr,
             markers=True,
         )
     fig.update_layout(xaxis_title="Time", yaxis_title=r"Spin Frequency (hz)")

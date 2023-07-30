@@ -85,7 +85,7 @@ with st.sidebar:
         with set0:
             plottype = st.radio("Nu Plot Type", ["Line", "Scatter"])
         with set00:
-            pass
+            datatype = st.radio("Plot Data", ["Natural", "Gaussian"])
         st.markdown("Interval Modes:")
         set1, set2 = st.columns(2)
         with set1:
@@ -138,7 +138,7 @@ with st.sidebar:
 st.session_state.show_df = show_df
 st.markdown(r"## $\nu$ Evolution")
 
-st.plotly_chart(plotting.evo_plot(table_in, plottype))
+st.plotly_chart(plotting.evo_plot(table_in, plottype, datatype))
 
 total, tnicer, txte = st.columns(3)
 total.metric("Total", len(table_in["NU"]))
