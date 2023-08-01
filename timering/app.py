@@ -11,6 +11,9 @@ import messages
 from astroquery.heasarc import Heasarc
 import logging
 import sys
+import os
+
+TIMERING = os.path.basename(sys.argv[0])
 
 
 def parseargs():
@@ -20,8 +23,11 @@ def parseargs():
                    "-db",
                    default="",
                    type=str,
-                   help="Local path to .twdb"
-                   )
+                   help="Local path to .twdb")
+    p.add_argument("--debug",
+                   default=False,
+                   action="store_true",
+                   help="Sets logging mode to debug")
 
     pargs = p.parse_args()
     return pargs
@@ -101,6 +107,13 @@ def boxcarfit(df, tpts=1, lpts=1, order=1,
 
 
 def main(pargs: argparse.Namespace):
+    level = logging.WARNING
+    if pargs.debug is True:
+        level = logging.DEBUG
+    logging.basicConfig(stream=sys.stdout,
+                        level=level)
+    logger = logging.getLogger(TIMERING)
+
     if "show_df" not in st.session_state:
         st.session_state.show_df = "Off"
 
@@ -192,19 +205,26 @@ def main(pargs: argparse.Namespace):
             with set1:
                 show_nufit = st.radio("Show Plot",
                                       ["Off", "On"])
+                logger.debug(f"Delta nu plot {show_nufit}")
                 addcrabtime = st.radio("Include CRABTIME",
                                        ["Off", "On"])
+                logger.debug(f"CRABTIME {addcrabtime} for dnu plot")
             with set2:
                 rmode = st.radio("Residual Mode",
                                  ["Difference", "Coefficient"])
+                logger.debug(f"Residual mode set to {rmode}")
                 addxray = st.radio("Include X-Ray",
                                    ["Off", "On"],
                                    index=1)
+                logger.debug(f"X-Ray {addxray} for dnu plot")
             st.session_state.show_nufit = show_nufit
             trail = st.slider("# of Trailing Boxcar Points", 2, 10, 2)
+            logger.debug(f"Boxcar set to {trail} trailing pts")
             lead = st.slider("# of Leading Boxcar Points", 2, 10, 2)
+            logger.debug(f"Boxcar set to {lead} leading pts")
             order = st.number_input("Order of Polynomial", min_value=1,
                                     max_value=3, step=1)
+            logger.debug(f"Boxcar set to {order} polynomial")
 
     if "show_nufit" not in st.session_state:
         st.session_state.show_nufit = "Off"
@@ -220,6 +240,7 @@ def main(pargs: argparse.Namespace):
             dnuplot.add_trace(go.Scatter(x=radiodnu["TIME"],
                                          y=radiodnu["DNU"],
                                          name='Radio'))
+            logger.debug("CRABTIME radio included dnu plot")
         if addxray == "On":
             nuresiduals = boxcarfit(table_in, tpts=trail,
                                     lpts=lead, order=order,
@@ -227,6 +248,7 @@ def main(pargs: argparse.Namespace):
             dnuplot.add_trace(go.Scatter(x=nuresiduals["TIME"],
                                          y=nuresiduals["DNU"],
                                          name='X-Ray'))
+            logger.debug("X-Ray results included in dnu plot")
         dnuplot.update_layout(xaxis_title="Time",
                               yaxis_title=r"Nu Residual")
         st.plotly_chart(dnuplot, order=order)
@@ -237,12 +259,14 @@ def main(pargs: argparse.Namespace):
         nif = pd.read_sql("SELECT NICER.OBSID, NICER.TWR_FILE FROM NICER " +
                           "WHERE NICER.TWR_FILE IS NOT NULL", con)
     except pd.errors.DatabaseError:
+        logger.warning("No NICER Table Found")
         nif = pd.DataFrame({"OBSID": []})
 
     try:
         xtef = pd.read_sql("SELECT XTE.OBSID, XTE.TWR_FILE FROM XTE " +
                            "WHERE XTE.TWR_FILE IS NOT NULL", con)
     except pd.errors.DatabaseError:
+        logger.warning("No XTE Table Found")
         xtef = pd.DataFrame({"OBSID": []})
 
     resdf = pd.merge(nif, xtef, how="outer")
