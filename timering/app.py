@@ -136,18 +136,22 @@ def main(pargs: argparse.Namespace):
             set0, set00 = st.columns(2)
             with set0:
                 plottype = st.radio("Nu Plot Type", ["Line", "Scatter"])
+                logger.debug(f"Nu Evolution plot type set to {plottype}")
             with set00:
                 datatype = st.radio("Plot Data", ["Natural", "Gaussian"])
+                logger.debug(f"Nu Evolution plot shows {plottype} ZN2 data")
             st.markdown("Interval Modes:")
             set1, set2 = st.columns(2)
             with set1:
                 xteintmode = st.selectbox("XTE",
                                           options=["all", "full", "gti"]
                                           )
+                logger.debug(f"XTE Interval Mode set to {xteintmode}")
             with set2:
                 nicerintmode = st.selectbox("NICER",
                                             options=["all", "full", "gti"]
                                             )
+                logger.debug(f"NICER Interval Mode set to {nicerintmode}")
             nitable = querymission(table_in, "NICER")
             nitable = filter_intmode(nitable, nicerintmode)
             xtetable = querymission(table_in, "XTE")
@@ -157,8 +161,10 @@ def main(pargs: argparse.Namespace):
             set3, set4 = st.columns(2)
             with set3:
                 minerr = st.text_input("Min Error", value=0.0)
+                logger.debug(f"Min Error set to {minerr}")
             with set4:
                 maxerr = st.text_input("Max Error", value=1.0)
+                logger.debug(f"Max Eror set to {maxerr}")
             table_in = filtermax(table_in, "NU_ERR", maxerr)
             table_in = filtermin(table_in, "NU_ERR", minerr)
             minzn2 = st.text_input("Min $Z_n^2$", value=30.0)
@@ -167,24 +173,30 @@ def main(pargs: argparse.Namespace):
             set5, set6 = st.columns(2)
             with set5:
                 mingerr = st.text_input("Min Gaussian Error", value=-0.1)
+                logger.debug(f"Min Gaussian Fit error set to {mingerr}")
             with set6:
                 maxgerr = st.text_input("Max Gaussian Error", value=1.0)
+                logger.debug(f"Max Gaussian error set to {maxgerr}")
             table_in = filtermax(table_in, "G_NU_ERR", maxgerr)
             table_in = filtermin(table_in, "G_NU_ERR", mingerr)
             st.markdown(r"Exposure (s)")
             set7, set8 = st.columns(2)
             with set7:
                 minexpo = st.text_input("Min Exposure", value=0.0)
+                logger.debug(f"Min exposure set to {minexpo}")
             with set8:
                 maxexpo = st.text_input("Max Exposure", value=1000000)
+                logger.debug(f"Max Exposure set to {maxexpo}")
             table_in = filtermax(table_in, "EXPOSURE", maxexpo)
             table_in = filtermin(table_in, "EXPOSURE", minexpo)
             st.markdown(r"Arrival Times (counts)")
             set9, set10 = st.columns(2)
             with set9:
                 minats = st.text_input("Min ATs", value=0.0)
+                logger.debug(f"Min Arrival times set to {minats}")
             with set10:
                 maxats = st.text_input("Max ATs", value=1000000000)
+                logger.debug(f"Max Arrival times set to {maxats}")
             table_in = filtermax(table_in, "ATS", maxats)
             table_in = filtermin(table_in, "ATS", minats)
     st.session_state.show_df = show_df
