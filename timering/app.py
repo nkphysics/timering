@@ -300,9 +300,9 @@ def main(pargs: argparse.Namespace):
                 st.markdown(f"### Interval {num - subindex}")
             sluicing, phasecurve = st.columns(2)
             with sluicing:
-                st.pyplot(rplots[num])
+                st.pyplot(rplots["ZN2"][num])
             with phasecurve:
-                st.pyplot(rplots[num + 1])
+                st.pyplot(rplots["Phase"][num])
     with st.expander("More Info On Individual Results"):
         st.markdown(messages.iresult_info())
 

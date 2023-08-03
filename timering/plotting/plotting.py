@@ -114,14 +114,16 @@ def obsid_plots(resultfile):
     from a specfied result file
     """
     obsid = Result(resultfile)
-    plots = []
+    plots = {"ZN2": [], "Phase": []}
     for i in range(1, len(obsid.hdul)):
         header, table = obsid.get_hdu(i)
         title = obsid.get_title(header)
         if header["EXTNAME"] == "PHASE CURVE":
-            plot = spincurveplot(table, title=title)
-            plots.append(plot)
+            if len(plots["ZN2"]) > len(plots["Phase"]):
+                plot = spincurveplot(table, title=title)
+                plots["Phase"].append(plot)
         else:
-            plot = resultplot(obsid.hdul[i], title=title)
-            plots.append(plot)
+            if header["ZN2"] >= 30.0:
+                plot = resultplot(obsid.hdul[i], title=title)
+                plots["ZN2"].append(plot)
     return plots
