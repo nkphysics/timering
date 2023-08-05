@@ -291,18 +291,16 @@ def main(pargs: argparse.Namespace):
     obsid_filt = resdf.loc[resdf["OBSID"] == obsid]
     obsid_filt.reset_index(drop=True, inplace=True)
     rplots = plotting.obsid_plots(obsid_filt["TWR_FILE"][0])
-    for num, i in enumerate(rplots):
-        if num % 2 == 0:
-            if num <= 1:
-                st.markdown("### Full")
-            else:
-                subindex = int(num - (num / 2.0))
-                st.markdown(f"### Interval {num - subindex}")
-            sluicing, phasecurve = st.columns(2)
-            with sluicing:
-                st.pyplot(rplots["ZN2"][num])
-            with phasecurve:
-                st.pyplot(rplots["Phase"][num])
+    for num, _ in enumerate(rplots["ZN2"]):
+        if num <= 0:
+            st.markdown("### Full")
+        else:
+            st.markdown(f"### Interval {num}")
+        sluicing, phasecurve = st.columns(2)
+        with sluicing:
+            st.pyplot(rplots["ZN2"][num])
+        with phasecurve:
+            st.pyplot(rplots["Phase"][num])
     with st.expander("More Info On Individual Results"):
         st.markdown(messages.iresult_info())
 
