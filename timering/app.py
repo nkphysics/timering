@@ -129,7 +129,6 @@ def main(pargs: argparse.Namespace):
     con = sqlite3.connect(dbpath)
     table_in = pd.read_sql_query("SELECT * FROM nu_results", con,
                                  parse_dates=["TIME"])
-    table_in["TIME"] = pd.to_datetime(table_in["TIME"])
     table_in = table_in.sort_values(by="TIME")
     with st.sidebar:
         with st.expander("Timing Evolution Filters"):
@@ -291,16 +290,17 @@ def main(pargs: argparse.Namespace):
     obsid_filt = resdf.loc[resdf["OBSID"] == obsid]
     obsid_filt.reset_index(drop=True, inplace=True)
     rplots = plotting.obsid_plots(obsid_filt["TWR_FILE"][0])
-    for num, _ in enumerate(rplots["ZN2"]):
-        if num <= 0:
-            st.markdown("### Full")
-        else:
-            st.markdown(f"### Interval {num}")
-        sluicing, phasecurve = st.columns(2)
-        with sluicing:
-            st.pyplot(rplots["ZN2"][num])
-        with phasecurve:
-            st.pyplot(rplots["Phase"][num])
+    for num, fig in enumerate(rplots["ZN2"]):
+        if fig is not False:
+            if num <= 0:
+                st.markdown("### Full")
+            else:
+                st.markdown(f"### Interval {num}")
+            sluicing, phasecurve = st.columns(2)
+            with sluicing:
+                st.pyplot(rplots["ZN2"][num])
+            with phasecurve:
+                st.pyplot(rplots["Phase"][num])
     with st.expander("More Info On Individual Results"):
         st.markdown(messages.iresult_info())
 
