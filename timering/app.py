@@ -127,6 +127,9 @@ def main(pargs: argparse.Namespace):
         )
 
     con = sqlite3.connect(dbpath)
+    src = pd.read_sql_query("SELECT Source FROM df_metadata WHERE rowid = 1",
+                            con)
+    st.markdown(f"# {src['Source'][0]}")
     table_in = pd.read_sql_query("SELECT * FROM nu_results", con,
                                  parse_dates=["TIME"])
     table_in = table_in.sort_values(by="TIME")
