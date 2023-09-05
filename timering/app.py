@@ -115,16 +115,13 @@ def main(pargs: argparse.Namespace):
     logger = logging.getLogger(TIMERING)
 
     if "show_df" not in st.session_state:
-        st.session_state.show_df = "Off"
+        st.session_state.show_df = False
 
     with st.sidebar:
         st.markdown("# Timering")
         dbpath = st.text_input("Local database path", value=pargs.database)
         dbpath = pathlib.Path(dbpath).resolve()
-        show_df = st.radio(
-            "Show Data Table",
-            ["Off", "On"],
-        )
+        show_df = st.toggle("Show Data Table")
 
     con = sqlite3.connect(dbpath)
     src = pd.read_sql_query("SELECT Source FROM df_metadata WHERE rowid = 1",
@@ -210,7 +207,7 @@ def main(pargs: argparse.Namespace):
     total.metric("Total", len(table_in["NU"]))
     tnicer.metric("NICER", len(table_in.loc[table_in["MISSION"] == "NICER"]))
     txte.metric("XTE", len(table_in.loc[table_in["MISSION"] == "XTE"]))
-    if st.session_state.show_df == "On":
+    if st.session_state.show_df is True:
         st.dataframe(table_in, use_container_width=True)
         st.markdown(messages.tableinfo())
     with st.sidebar:
