@@ -12,7 +12,7 @@ from astroquery.heasarc import Heasarc
 import logging
 import sys
 import os
-import configparser
+import json
 
 TIMERING = os.path.basename(sys.argv[0])
 
@@ -116,9 +116,9 @@ def parse_config(configpath):
     """
     Parses a config file for multiple databases
     """
-    cfg = configparser.ConfigParser()
-    cfg.read(configpath)
-    return cfg["sources"]
+    with open(configpath) as config:
+        cfg = json.load(config)
+        return cfg
 
 
 def main(pargs: argparse.Namespace):
@@ -140,8 +140,8 @@ def main(pargs: argparse.Namespace):
             dbpath = pathlib.Path(dbpath).resolve()
         else:
             sources = parse_config(pargs.config)
-            srcsel = st.selectbox("Source", sources.keys())
-            dbpath = pathlib.Path(sources[srcsel]).resolve()
+            srcsel = st.selectbox("Source", sources)
+            dbpath = pathlib.Path(sources[srcsel]["database"]).resolve()
         show_df = st.toggle("Show Data Table")
 
     con = sqlite3.connect(dbpath)

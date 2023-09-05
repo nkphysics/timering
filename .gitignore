@@ -40,4 +40,4 @@ cover/
 target/
 *.twr
 *.twdb
-config.ini
+config.json
