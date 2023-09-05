@@ -237,8 +237,7 @@ def main(pargs: argparse.Namespace):
             with set1:
                 show_nufit = st.toggle("Show Plot")
                 logger.debug(f"Delta nu plot {show_nufit}")
-                addcrabtime = st.radio("Include CRABTIME",
-                                       ["Off", "On"])
+                addcrabtime = st.toggle("Include CRABTIME")
                 logger.debug(f"CRABTIME {addcrabtime} for dnu plot")
             with set2:
                 rmode = st.radio("Residual Mode",
@@ -263,7 +262,7 @@ def main(pargs: argparse.Namespace):
         st.divider()
         st.markdown(r"## $\delta \nu$ Fitting of $\nu$ Data")
         dnuplot = go.Figure()
-        if addcrabtime == "On":
+        if addcrabtime:
             jbcrab = getcrabtime()
             radiodnu = boxcarfit(jbcrab, tpts=trail,
                                  lpts=lead, order=order,
@@ -283,7 +282,7 @@ def main(pargs: argparse.Namespace):
         dnuplot.update_layout(xaxis_title="Time",
                               yaxis_title=r"Nu Residual")
         st.plotly_chart(dnuplot, order=order)
-        if addcrabtime == "On":
+        if addcrabtime:
             st.markdown(messages.crabtime_credit())
 
     try:
