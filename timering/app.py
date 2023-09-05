@@ -12,6 +12,7 @@ from astroquery.heasarc import Heasarc
 import logging
 import sys
 import os
+import configparser
 
 TIMERING = os.path.basename(sys.argv[0])
 
@@ -28,6 +29,11 @@ def parseargs():
                    default=False,
                    action="store_true",
                    help="Sets logging mode to debug")
+    p.add_argument("--config",
+                   "-cfg",
+                   default=None,
+                   type=str,
+                   help="Config file for multiple databases")
 
     pargs = p.parse_args()
     return pargs
@@ -106,6 +112,15 @@ def boxcarfit(df, tpts=1, lpts=1, order=1,
     return coeffs
 
 
+def parse_config(configpath):
+    """
+    Parses a config file for multiple databases
+    """
+    cfg = configparser.ConfigParser()
+    cfg.read(configpath)
+    return cfg["sources"]
+
+
 def main(pargs: argparse.Namespace):
     level = logging.WARNING
     if pargs.debug is True:
@@ -119,8 +134,14 @@ def main(pargs: argparse.Namespace):
 
     with st.sidebar:
         st.markdown("# Timering")
-        dbpath = st.text_input("Local database path", value=pargs.database)
-        dbpath = pathlib.Path(dbpath).resolve()
+        if pargs.config is None:
+            dbpath = st.text_input("Local database path",
+                                   value=pargs.database)
+            dbpath = pathlib.Path(dbpath).resolve()
+        else:
+            sources = parse_config(pargs.config)
+            srcsel = st.selectbox("Source", sources.keys())
+            dbpath = pathlib.Path(sources[srcsel]).resolve()
         show_df = st.toggle("Show Data Table")
 
     con = sqlite3.connect(dbpath)
