@@ -239,14 +239,12 @@ def main(pargs: argparse.Namespace):
                 logger.debug(f"Delta nu plot {show_nufit}")
                 addcrabtime = st.toggle("Include CRABTIME")
                 logger.debug(f"CRABTIME {addcrabtime} for dnu plot")
+                addxray = st.toggle("Include X-Ray", value=True)
+                logger.debug(f"X-Ray {addxray} for dnu plot")
             with set2:
                 rmode = st.radio("Residual Mode",
                                  ["Difference", "Coefficient"])
                 logger.debug(f"Residual mode set to {rmode}")
-                addxray = st.radio("Include X-Ray",
-                                   ["Off", "On"],
-                                   index=1)
-                logger.debug(f"X-Ray {addxray} for dnu plot")
             st.session_state.show_nufit = show_nufit
             trail = st.slider("# of Trailing Boxcar Points", 2, 10, 2)
             logger.debug(f"Boxcar set to {trail} trailing pts")
@@ -271,7 +269,7 @@ def main(pargs: argparse.Namespace):
                                          y=radiodnu["DNU"],
                                          name='Radio'))
             logger.debug("CRABTIME radio included dnu plot")
-        if addxray == "On":
+        if addxray:
             nuresiduals = boxcarfit(table_in, tpts=trail,
                                     lpts=lead, order=order,
                                     mode=rmode)
