@@ -235,8 +235,7 @@ def main(pargs: argparse.Namespace):
         with st.expander(r"$\delta \nu$ Fitting from $\nu$"):
             set1, set2 = st.columns(2)
             with set1:
-                show_nufit = st.radio("Show Plot",
-                                      ["Off", "On"])
+                show_nufit = st.toggle("Show Plot")
                 logger.debug(f"Delta nu plot {show_nufit}")
                 addcrabtime = st.radio("Include CRABTIME",
                                        ["Off", "On"])
@@ -259,8 +258,8 @@ def main(pargs: argparse.Namespace):
             logger.debug(f"Boxcar set to {order} polynomial")
 
     if "show_nufit" not in st.session_state:
-        st.session_state.show_nufit = "Off"
-    if st.session_state.show_nufit == "On":
+        st.session_state.show_nufit = False
+    if st.session_state.show_nufit:
         st.divider()
         st.markdown(r"## $\delta \nu$ Fitting of $\nu$ Data")
         dnuplot = go.Figure()
