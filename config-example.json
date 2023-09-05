@@ -1,0 +1,4 @@
+{
+    "Source 1": {"database": "path to source_1.twdb"},
+    "Source 2": {"database": "path to source_2.twdb"}
+}
