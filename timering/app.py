@@ -121,6 +121,13 @@ def parse_config(configpath):
         return cfg
 
 
+def makecsv(df):
+    """
+    Converts a pandas dataframe to csv for download
+    """
+    return df.to_csv().encode('utf-8')
+
+
 def main(pargs: argparse.Namespace):
     level = logging.WARNING
     if pargs.debug is True:
@@ -145,12 +152,14 @@ def main(pargs: argparse.Namespace):
         show_df = st.toggle("Show Data Table")
 
     con = sqlite3.connect(dbpath)
-    src = pd.read_sql_query("SELECT Source FROM df_metadata WHERE rowid = 1",
+    src_query = pd.read_sql_query("SELECT Source FROM df_metadata WHERE rowid = 1",
                             con)
-    st.markdown(f"# {src['Source'][0]}")
+    src = src_query['Source'][0]
+    st.markdown(f"# {src}")
     table_in = pd.read_sql_query("SELECT * FROM nu_results", con,
                                  parse_dates=["TIME"])
     table_in = table_in.sort_values(by="TIME")
+    unfiltereddf = table_in.copy()
     with st.sidebar:
         with st.expander("Timing Evolution Filters"):
             set0, set00 = st.columns(2)
@@ -228,6 +237,14 @@ def main(pargs: argparse.Namespace):
     total.metric("Total", len(table_in["NU"]))
     tnicer.metric("NICER", len(table_in.loc[table_in["MISSION"] == "NICER"]))
     txte.metric("XTE", len(table_in.loc[table_in["MISSION"] == "XTE"]))
+
+    dall, dfilt = st.columns(2)
+    with dall:
+        unfilteredcsv = makecsv(unfiltereddf)
+        st.download_button(label="Download Unfiltered Data",
+                           data=unfilteredcsv,
+                           file_name=f"{src}-all.csv",
+                           mime='text/csv')
     if st.session_state.show_df is True:
         st.dataframe(table_in, use_container_width=True)
         st.markdown(messages.tableinfo())
