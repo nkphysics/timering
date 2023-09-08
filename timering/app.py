@@ -140,7 +140,7 @@ def main(pargs: argparse.Namespace):
         st.session_state.show_df = False
 
     with st.sidebar:
-        st.markdown("# Timering")
+        st.markdown("# Catalog Options")
         if pargs.config is None:
             dbpath = st.text_input("Local database path",
                                    value=pargs.database)
@@ -152,8 +152,9 @@ def main(pargs: argparse.Namespace):
         show_df = st.toggle("Show Data Table")
 
     con = sqlite3.connect(dbpath)
-    src_query = pd.read_sql_query("SELECT Source FROM df_metadata WHERE rowid = 1",
-                            con)
+    src_query = pd.read_sql_query(("SELECT Source FROM df_metadata " +
+                                  "WHERE rowid = 1"),
+                                  con)
     src = src_query['Source'][0]
     st.markdown(f"# {src}")
     table_in = pd.read_sql_query("SELECT * FROM nu_results", con,
@@ -244,6 +245,12 @@ def main(pargs: argparse.Namespace):
         st.download_button(label="Download Unfiltered Data",
                            data=unfilteredcsv,
                            file_name=f"{src}-all.csv",
+                           mime='text/csv')
+    with dfilt:
+        unfilteredcsv = makecsv(table_in)
+        st.download_button(label="Download Filtered Data",
+                           data=unfilteredcsv,
+                           file_name=f"{src}-filtered.csv",
                            mime='text/csv')
     if st.session_state.show_df is True:
         st.dataframe(table_in, use_container_width=True)
