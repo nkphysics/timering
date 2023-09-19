@@ -150,13 +150,20 @@ def main(pargs: argparse.Namespace):
             srcsel = st.selectbox("Source", sources)
             dbpath = pathlib.Path(sources[srcsel]["database"]).resolve()
         show_df = st.toggle("Show Data Table")
-
-    con = sqlite3.connect(dbpath)
-    src_query = pd.read_sql_query(("SELECT Source FROM df_metadata " +
-                                  "WHERE rowid = 1"),
-                                  con)
-    src = src_query['Source'][0]
-    st.markdown(f"# {src}")
+    try:
+        con = sqlite3.connect(dbpath)
+        src_query = pd.read_sql_query(("SELECT Source FROM df_metadata " +
+                                      "WHERE rowid = 1"),
+                                      con)
+        src = src_query['Source'][0]
+        st.markdown(f"# {src}")
+    except sqlite3.OperationalError:
+        logger.critical("Unable to connect to database")
+    try:
+        alias = sources[srcsel]["alias"]
+        st.markdown(f"**Aliases:** {alias}")
+    except KeyError:
+        logger.debug("No aliases for {srcsel}")
     table_in = pd.read_sql_query("SELECT * FROM nu_results", con,
                                  parse_dates=["TIME"])
     table_in = table_in.sort_values(by="TIME")
