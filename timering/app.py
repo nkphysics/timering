@@ -45,9 +45,18 @@ def querymission(table_in, mission):
 
 
 def filter_intmode(table, intmode):
+    """
+    Filters a datatable by interval mode
+    """
     if intmode != "all":
-        table = table.loc[table["MODE"] == intmode.lower()]
-    return table
+        modetable = table.loc[table["MODE"] == intmode.lower()]
+        if intmode == "gti":
+            fulltable = table.loc[table["MODE"] == "full"]
+            merged = fulltable[~fulltable.OBSID.isin(modetable.OBSID)]
+            modetable = pd.concat([modetable, merged])
+    else:
+        modetable = table
+    return modetable
 
 
 def filtermax(table, column, maxbound):
