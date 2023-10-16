@@ -86,7 +86,9 @@ def poweredby():
     Message acknowledging all of the packages uses in development
     """
     info = ("""
-            This is powered by the following packages. 
+            ### Site
+
+            This web dashboard is powered by the following packages. 
 
             If you find this useful in any way please make sure to give
             credit to all the listed software packages (In no particular order).
@@ -112,4 +114,19 @@ def poweredby():
             - Streamlit
 
             """)
+    return info
+
+
+def heasarc_credit():
+    """
+    Information to credit HEASARC and missions' archives
+    (i.e. NICER and RXTE as of 2023-10-15)
+    """
+    info = ("""
+            ### Research
+
+            This research has made use of data and/or software provided by the 
+            High Energy Astrophysics Science Archive Research Center (HEASARC), 
+            which is a service of the Astrophysics Science Division at NASA/GSFC.
+            """)   
     return info

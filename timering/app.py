@@ -362,6 +362,8 @@ def main(pargs: argparse.Namespace):
         st.markdown(messages.iresult_info())
 
     st.divider()
+    st.markdown("## Acknowledgments")
+    st.markdown(messages.heasarc_credit())
     st.markdown(messages.poweredby())
 
 
