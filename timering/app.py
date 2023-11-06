@@ -245,6 +245,7 @@ def main(pargs: argparse.Namespace):
                 logger.debug(f"Max Arrival times set to {maxats}")
             table_in = filtermax(table_in, "ATS", maxats)
             table_in = filtermin(table_in, "ATS", minats)
+    table_in = table_in.sort_values(by="TIME")
     st.session_state.show_df = show_df
     st.markdown(r"## $\nu$ Evolution")
 
