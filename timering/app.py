@@ -29,6 +29,10 @@ def parseargs():
                    default=False,
                    action="store_true",
                    help="Sets logging mode to debug")
+    p.add_argument("--local",
+                   default=False,
+                   action="store_true",
+                   help="Sets the path mode to local rather than web")
     p.add_argument("--config",
                    "-cfg",
                    default=None,
@@ -347,7 +351,10 @@ def main(pargs: argparse.Namespace):
     obsid = st.selectbox("OBSID", resdf["OBSID"])
     obsid_filt = resdf.loc[resdf["OBSID"] == obsid]
     obsid_filt.reset_index(drop=True, inplace=True)
-    rplots = plotting.obsid_plots(f'data/{obsid_filt["TWR_FILE"][0]}')
+    if pargs.local:
+        rplots = plotting.obsid_plots(obsid_filt["TWR_FILE"][0])
+    else:
+        rplots = plotting.obsid_plots(f'data/{obsid_filt["TWR_FILE"][0]}')
     for num, fig in enumerate(rplots["ZN2"]):
         if fig is not False:
             if num <= 0:
