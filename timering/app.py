@@ -73,6 +73,14 @@ def filtermin(table, column, minbound):
     return table
 
 
+def filter_obsidout(table, obsid):
+    """
+    Filters out the input table of a specific OBSID
+    """
+    table = table.loc[table["OBSID"] != obsid]
+    return table
+
+
 def getcrabtime():
     """
     Retrieves the CRABTIME database (Crab Pulsar Monthly
@@ -168,6 +176,8 @@ def main(pargs: argparse.Namespace):
         src_query = pd.read_sql_query(("SELECT Source FROM df_metadata " +
                                       "WHERE rowid = 1"),
                                       con)
+        obsids = pd.read_sql_query(("""SELECT DISTINCT OBSID
+                                       from nu_results"""), con)
         src = src_query['Source'][0]
         st.markdown(f"# {src}")
     except sqlite3.OperationalError:
@@ -207,6 +217,10 @@ def main(pargs: argparse.Namespace):
             xtetable = querymission(table_in, "XTE")
             xtetable = filter_intmode(xtetable, xteintmode)
             table_in = pd.merge(xtetable, nitable, how="outer")
+            obsouts = st.multiselect("OBSID Exclusions", obsids["OBSID"])
+            st.session_state.obsouts = obsouts
+            for i in obsouts:
+                table_in = filter_obsidout(table_in, i)
             st.markdown(r"$\nu$ Error (hz)")
             set3, set4 = st.columns(2)
             with set3:
