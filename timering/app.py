@@ -149,6 +149,33 @@ def makecsv(df):
     return df.to_csv().encode('utf-8')
 
 
+class Dashboard:
+
+    def __init__(self, pargs):
+        self.sources = []
+        self.srcsel = ""
+        self.dbpath = self.catalog_options_parsing()
+
+    def catalog_options_parsing(self):
+        """
+        Parses setup for timering from config or input database
+
+        Returns: Path to selected source database
+        """
+        with st.sidebar:
+            st.markdown("# Catalog Options")
+            if pargs.config is None:
+                dbpath_in = st.text_input("Local database path",
+                                          value=pargs.database)
+                dbpath = pathlib.Path(dbpath_in).resolve()
+            else:
+                self.sources = parse_config(pargs.config)
+                self.srcsel = st.selectbox("Source", self.sources)
+                dbpath = pathlib.Path(self.sources[self.srcsel]
+                                                  ["database"]).resolve()
+            return dbpath
+
+
 def main(pargs: argparse.Namespace):
     level = logging.WARNING
     if pargs.debug is True:
@@ -159,20 +186,11 @@ def main(pargs: argparse.Namespace):
 
     if "show_df" not in st.session_state:
         st.session_state.show_df = False
-
+    dashboard = Dashboard(pargs)
     with st.sidebar:
-        st.markdown("# Catalog Options")
-        if pargs.config is None:
-            dbpath = st.text_input("Local database path",
-                                   value=pargs.database)
-            dbpath = pathlib.Path(dbpath).resolve()
-        else:
-            sources = parse_config(pargs.config)
-            srcsel = st.selectbox("Source", sources)
-            dbpath = pathlib.Path(sources[srcsel]["database"]).resolve()
         show_df = st.toggle("Show Data Table")
     try:
-        con = sqlite3.connect(dbpath)
+        con = sqlite3.connect(dashboard.dbpath)
         src_query = pd.read_sql_query(("SELECT Source FROM df_metadata " +
                                       "WHERE rowid = 1"),
                                       con)
@@ -183,10 +201,10 @@ def main(pargs: argparse.Namespace):
     except sqlite3.OperationalError:
         logger.critical("Unable to connect to database")
     try:
-        alias = sources[srcsel]["alias"]
+        alias = dashboard.sources[dashboard.srcsel]["alias"]
         st.markdown(f"**Aliases:** {alias}")
     except KeyError:
-        logger.debug("No aliases for {srcsel}")
+        logger.debug("No aliases for {dashboard.srcsel}")
     table_in = pd.read_sql_query("SELECT * FROM nu_results", con,
                                  parse_dates=["TIME"])
     table_in = table_in.sort_values(by="TIME")
