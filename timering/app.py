@@ -151,10 +151,14 @@ def makecsv(df):
 
 class Dashboard:
 
-    def __init__(self, pargs):
+    def __init__(self, pargs, logger):
+        self.logger = logger
         self.sources = []
         self.srcsel = ""
         self.dbpath = self.catalog_options_parsing()
+        self.con = self.connect_twdb()
+        self.active_src = self.get_src()
+        self.obsids = self.get_obsids()
 
     def catalog_options_parsing(self):
         """
@@ -175,6 +179,25 @@ class Dashboard:
                                                   ["database"]).resolve()
             return dbpath
 
+    def connect_twdb(self):
+        try:
+            con = sqlite3.connect(self.dbpath)
+            return con
+        except sqlite3.OperationalError:
+            self.logger.critical("Unable to connect to database")
+
+    def get_src(self):
+        src_query = pd.read_sql_query(("""SELECT Source FROM df_metadata
+                                          WHERE rowid = 1"""),
+                                      self.con)
+        src = src_query['Source'][0]
+        return src
+
+    def get_obsids(self):
+        obsids = pd.read_sql_query(("""SELECT DISTINCT OBSID
+                                       from nu_results"""), self.con)
+        return obsids["OBSID"]
+
 
 def main(pargs: argparse.Namespace):
     level = logging.WARNING
@@ -186,26 +209,17 @@ def main(pargs: argparse.Namespace):
 
     if "show_df" not in st.session_state:
         st.session_state.show_df = False
-    dashboard = Dashboard(pargs)
+    dashboard = Dashboard(pargs, logger)
     with st.sidebar:
         show_df = st.toggle("Show Data Table")
-    try:
-        con = sqlite3.connect(dashboard.dbpath)
-        src_query = pd.read_sql_query(("SELECT Source FROM df_metadata " +
-                                      "WHERE rowid = 1"),
-                                      con)
-        obsids = pd.read_sql_query(("""SELECT DISTINCT OBSID
-                                       from nu_results"""), con)
-        src = src_query['Source'][0]
-        st.markdown(f"# {src}")
-    except sqlite3.OperationalError:
-        logger.critical("Unable to connect to database")
+    st.markdown(f"# {dashboard.active_src}")
+
     try:
         alias = dashboard.sources[dashboard.srcsel]["alias"]
         st.markdown(f"**Aliases:** {alias}")
     except KeyError:
         logger.debug("No aliases for {dashboard.srcsel}")
-    table_in = pd.read_sql_query("SELECT * FROM nu_results", con,
+    table_in = pd.read_sql_query("SELECT * FROM nu_results", dashboard.con,
                                  parse_dates=["TIME"])
     table_in = table_in.sort_values(by="TIME")
     unfiltereddf = table_in.copy()
@@ -235,7 +249,7 @@ def main(pargs: argparse.Namespace):
             xtetable = querymission(table_in, "XTE")
             xtetable = filter_intmode(xtetable, xteintmode)
             table_in = pd.merge(xtetable, nitable, how="outer")
-            obsouts = st.multiselect("OBSID Exclusions", obsids["OBSID"])
+            obsouts = st.multiselect("OBSID Exclusions", dashboard.obsids)
             st.session_state.obsouts = obsouts
             for i in obsouts:
                 table_in = filter_obsidout(table_in, i)
@@ -297,13 +311,13 @@ def main(pargs: argparse.Namespace):
         unfilteredcsv = makecsv(unfiltereddf)
         st.download_button(label="Download Unfiltered Data",
                            data=unfilteredcsv,
-                           file_name=f"{src}-all.csv",
+                           file_name=f"{dashboard.active_src}-all.csv",
                            mime='text/csv')
     with dfilt:
         unfilteredcsv = makecsv(table_in)
         st.download_button(label="Download Filtered Data",
                            data=unfilteredcsv,
-                           file_name=f"{src}-filtered.csv",
+                           file_name=f"{dashboard.active_src}-filtered.csv",
                            mime='text/csv')
     if st.session_state.show_df is True:
         st.dataframe(table_in, use_container_width=True)
@@ -362,14 +376,14 @@ def main(pargs: argparse.Namespace):
 
     try:
         nif = pd.read_sql("SELECT NICER.OBSID, NICER.TWR_FILE FROM NICER " +
-                          "WHERE NICER.TWR_FILE IS NOT NULL", con)
+                          "WHERE NICER.TWR_FILE IS NOT NULL", dashboard.con)
     except pd.errors.DatabaseError:
         logger.warning("No NICER Table Found")
         nif = pd.DataFrame({"OBSID": []})
 
     try:
         xtef = pd.read_sql("SELECT XTE.OBSID, XTE.TWR_FILE FROM XTE " +
-                           "WHERE XTE.TWR_FILE IS NOT NULL", con)
+                           "WHERE XTE.TWR_FILE IS NOT NULL", dashboard.con)
     except pd.errors.DatabaseError:
         logger.warning("No XTE Table Found")
         xtef = pd.DataFrame({"OBSID": []})
