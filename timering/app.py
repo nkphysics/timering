@@ -206,6 +206,11 @@ class Dashboard:
         table_in = table_in.sort_values(by="TIME")
         return table_in
 
+    def min_max_filters(self, column, minval, maxval):
+        self.nuresults = filtermax(self.nuresults, column, maxval)
+        self.nuresults = filtermin(self.nuresults, column, minval)
+        return self.nuresults
+
 
 def main(pargs: argparse.Namespace):
     level = logging.WARNING
@@ -267,8 +272,7 @@ def main(pargs: argparse.Namespace):
             with set4:
                 maxerr = st.text_input("Max Error", value=1.0)
                 logger.debug(f"Max Eror set to {maxerr}")
-            table_in = filtermax(table_in, "NU_ERR", maxerr)
-            table_in = filtermin(table_in, "NU_ERR", minerr)
+            table_in = dashboard.min_max_filters("NU_ERR", minerr, maxerr)
             minzn2 = st.text_input("Min $Z_n^2$", value=30.0)
             table_in = filtermin(table_in, "ZN2", minzn2)
             st.markdown(r"$\nu$ Gaussian Fit Error (hz)")
@@ -279,8 +283,7 @@ def main(pargs: argparse.Namespace):
             with set6:
                 maxgerr = st.text_input("Max Gaussian Error", value=1.0)
                 logger.debug(f"Max Gaussian error set to {maxgerr}")
-            table_in = filtermax(table_in, "G_NU_ERR", maxgerr)
-            table_in = filtermin(table_in, "G_NU_ERR", mingerr)
+            table_in = dashboard.min_max_filters("G_NU_ERR", mingerr, maxgerr)
             st.markdown(r"Exposure (s)")
             set7, set8 = st.columns(2)
             with set7:
@@ -289,8 +292,7 @@ def main(pargs: argparse.Namespace):
             with set8:
                 maxexpo = st.text_input("Max Exposure", value=1000000)
                 logger.debug(f"Max Exposure set to {maxexpo}")
-            table_in = filtermax(table_in, "EXPOSURE", maxexpo)
-            table_in = filtermin(table_in, "EXPOSURE", minexpo)
+            table_in = dashboard.min_max_filters("EXPOSURE", minexpo, maxexpo)
             st.markdown(r"Arrival Times (counts)")
             set9, set10 = st.columns(2)
             with set9:
@@ -299,8 +301,7 @@ def main(pargs: argparse.Namespace):
             with set10:
                 maxats = st.text_input("Max ATs", value=1000000000)
                 logger.debug(f"Max Arrival times set to {maxats}")
-            table_in = filtermax(table_in, "ATS", maxats)
-            table_in = filtermin(table_in, "ATS", minats)
+            table_in = dashboard.min_max_filters("ATS", minats, maxats)
     table_in = table_in.sort_values(by="TIME")
     st.session_state.show_df = show_df
     st.markdown(r"## $\nu$ Evolution")
