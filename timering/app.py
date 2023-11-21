@@ -159,6 +159,7 @@ class Dashboard:
         self.con = self.connect_twdb()
         self.active_src = self.get_src()
         self.obsids = self.get_obsids()
+        self.nuresults = self.get_nuresults()
 
     def catalog_options_parsing(self):
         """
@@ -198,6 +199,13 @@ class Dashboard:
                                        from nu_results"""), self.con)
         return obsids["OBSID"]
 
+    def get_nuresults(self):
+        table_in = pd.read_sql_query("SELECT * FROM nu_results",
+                                     self.con,
+                                     parse_dates=["TIME"])
+        table_in = table_in.sort_values(by="TIME")
+        return table_in
+
 
 def main(pargs: argparse.Namespace):
     level = logging.WARNING
@@ -219,9 +227,7 @@ def main(pargs: argparse.Namespace):
         st.markdown(f"**Aliases:** {alias}")
     except KeyError:
         logger.debug("No aliases for {dashboard.srcsel}")
-    table_in = pd.read_sql_query("SELECT * FROM nu_results", dashboard.con,
-                                 parse_dates=["TIME"])
-    table_in = table_in.sort_values(by="TIME")
+    table_in = dashboard.nuresults
     unfiltereddf = table_in.copy()
     with st.sidebar:
         with st.expander("Timing Evolution Filters"):
