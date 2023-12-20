@@ -206,7 +206,8 @@ class Dashboard:
         table_in = table_in.sort_values(by="TIME")
         return table_in
 
-    def min_max_filters(self, column, minval, maxval):
+    def min_max_filters(self, column: str, minval: float,
+                        maxval: float):
         self.nuresults = filtermax(self.nuresults, column, maxval)
         self.nuresults = filtermin(self.nuresults, column, minval)
         return self.nuresults
