@@ -256,11 +256,6 @@ def main(pargs: argparse.Namespace):
                                             options=["all", "full", "gti"]
                                             )
                 logger.debug(f"NICER Interval Mode set to {nicerintmode}")
-            nitable = querymission(table_in, "NICER")
-            nitable = filter_intmode(nitable, nicerintmode)
-            xtetable = querymission(table_in, "XTE")
-            xtetable = filter_intmode(xtetable, xteintmode)
-            table_in = pd.merge(xtetable, nitable, how="outer")
             obsouts = st.multiselect("OBSID Exclusions", dashboard.obsids)
             st.session_state.obsouts = obsouts
             for i in obsouts:
@@ -303,6 +298,11 @@ def main(pargs: argparse.Namespace):
                 maxats = st.text_input("Max ATs", value=1000000000)
                 logger.debug(f"Max Arrival times set to {maxats}")
             table_in = dashboard.min_max_filters("ATS", minats, maxats)
+            nitable = querymission(table_in, "NICER")
+            nitable = filter_intmode(nitable, nicerintmode)
+            xtetable = querymission(table_in, "XTE")
+            xtetable = filter_intmode(xtetable, xteintmode)
+            table_in = pd.merge(xtetable, nitable, how="outer")
     table_in = table_in.sort_values(by="TIME")
     st.session_state.show_df = show_df
     st.markdown(r"## $\nu$ Evolution")
