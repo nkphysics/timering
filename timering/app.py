@@ -258,8 +258,6 @@ def main(pargs: argparse.Namespace):
                 logger.debug(f"NICER Interval Mode set to {nicerintmode}")
             obsouts = st.multiselect("OBSID Exclusions", dashboard.obsids)
             st.session_state.obsouts = obsouts
-            for i in obsouts:
-                table_in = filter_obsidout(table_in, i)
             st.markdown(r"$\nu$ Error (hz)")
             set3, set4 = st.columns(2)
             with set3:
@@ -303,6 +301,8 @@ def main(pargs: argparse.Namespace):
             xtetable = querymission(table_in, "XTE")
             xtetable = filter_intmode(xtetable, xteintmode)
             table_in = pd.merge(xtetable, nitable, how="outer")
+            for i in obsouts:
+                table_in = filter_obsidout(table_in, i)
     table_in = table_in.sort_values(by="TIME")
     st.session_state.show_df = show_df
     st.markdown(r"## $\nu$ Evolution")
