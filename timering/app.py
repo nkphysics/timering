@@ -212,6 +212,13 @@ class Dashboard:
         self.nuresults = filtermin(self.nuresults, column, minval)
         return self.nuresults
 
+    def downloadcsv(self, data, label: str) -> None:
+        csvdata = makecsv(data)
+        st.download_button(label=label,
+                           data=csvdata,
+                           file_name=f"{self.active_src}.csv",
+                           mime='text/csv')
+
 
 def main(pargs: argparse.Namespace):
     level = logging.WARNING
@@ -316,17 +323,9 @@ def main(pargs: argparse.Namespace):
 
     dall, dfilt = st.columns(2)
     with dall:
-        unfilteredcsv = makecsv(unfiltereddf)
-        st.download_button(label="Download Unfiltered Data",
-                           data=unfilteredcsv,
-                           file_name=f"{dashboard.active_src}-all.csv",
-                           mime='text/csv')
+        dashboard.downloadcsv(unfiltereddf, "Download Unfiltered Data")
     with dfilt:
-        unfilteredcsv = makecsv(table_in)
-        st.download_button(label="Download Filtered Data",
-                           data=unfilteredcsv,
-                           file_name=f"{dashboard.active_src}-filtered.csv",
-                           mime='text/csv')
+        dashboard.downloadcsv(table_in, "Download Filtered Data")
     if st.session_state.show_df is True:
         st.dataframe(table_in, use_container_width=True)
         st.markdown(messages.tableinfo())
