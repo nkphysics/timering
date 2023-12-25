@@ -160,6 +160,7 @@ class Dashboard:
         self.active_src = self.get_src()
         self.obsids = self.get_obsids()
         self.nuresults = self.get_nuresults()
+        self.nuevo_filters = {}
 
     def catalog_options_parsing(self):
         """
@@ -218,6 +219,19 @@ class Dashboard:
                            data=csvdata,
                            file_name=f"{self.active_src}.csv",
                            mime='text/csv')
+
+    def min_max_columns(self, column: str, default: tuple):
+        seta, setb = st.columns(2)
+        with seta:
+            minval = st.text_input(f"Min {column}", value=default[0])
+            self.nuevo_filters[f"min_{column}"] = minval
+            self.logger.debug(f"Min {column} set to {minval}")
+        with setb:
+            maxval = st.text_input(f"Max {column}", value=default[1])
+            self.nuevo_filters[f"max_{column}"] = maxval
+            self.logger.debug(f"Max {column} set to {maxval}")
+        table_in = self.min_max_filters(column, minval, maxval)
+        return table_in
 
 
 def main(pargs: argparse.Namespace):
@@ -295,14 +309,7 @@ def main(pargs: argparse.Namespace):
                 logger.debug(f"Max Exposure set to {maxexpo}")
             table_in = dashboard.min_max_filters("EXPOSURE", minexpo, maxexpo)
             st.markdown(r"Arrival Times (counts)")
-            set9, set10 = st.columns(2)
-            with set9:
-                minats = st.text_input("Min ATs", value=0.0)
-                logger.debug(f"Min Arrival times set to {minats}")
-            with set10:
-                maxats = st.text_input("Max ATs", value=1000000000)
-                logger.debug(f"Max Arrival times set to {maxats}")
-            table_in = dashboard.min_max_filters("ATS", minats, maxats)
+            table_in = dashboard.min_max_columns("ATS", (0.0, 1000000000))
             nitable = querymission(table_in, "NICER")
             nitable = filter_intmode(nitable, nicerintmode)
             xtetable = querymission(table_in, "XTE")
