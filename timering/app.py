@@ -291,14 +291,7 @@ def main(pargs: argparse.Namespace):
             minzn2 = st.text_input("Min $Z_n^2$", value=30.0)
             table_in = filtermin(table_in, "ZN2", minzn2)
             st.markdown(r"$\nu$ Gaussian Fit Error (hz)")
-            set5, set6 = st.columns(2)
-            with set5:
-                mingerr = st.text_input("Min Gaussian Error", value=-0.1)
-                logger.debug(f"Min Gaussian Fit error set to {mingerr}")
-            with set6:
-                maxgerr = st.text_input("Max Gaussian Error", value=1.0)
-                logger.debug(f"Max Gaussian error set to {maxgerr}")
-            table_in = dashboard.min_max_filters("G_NU_ERR", mingerr, maxgerr)
+            table_in = dashboard.min_max_columns("G_NU_ERR", (-0.1, 1.0))
             st.markdown(r"Exposure (s)")
             table_in = dashboard.min_max_columns("EXPOSURE", (0.0, 1000000))
             st.markdown(r"Arrival Times (counts)")
