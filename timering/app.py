@@ -300,14 +300,7 @@ def main(pargs: argparse.Namespace):
                 logger.debug(f"Max Gaussian error set to {maxgerr}")
             table_in = dashboard.min_max_filters("G_NU_ERR", mingerr, maxgerr)
             st.markdown(r"Exposure (s)")
-            set7, set8 = st.columns(2)
-            with set7:
-                minexpo = st.text_input("Min Exposure", value=0.0)
-                logger.debug(f"Min exposure set to {minexpo}")
-            with set8:
-                maxexpo = st.text_input("Max Exposure", value=1000000)
-                logger.debug(f"Max Exposure set to {maxexpo}")
-            table_in = dashboard.min_max_filters("EXPOSURE", minexpo, maxexpo)
+            table_in = dashboard.min_max_columns("EXPOSURE", (0.0, 1000000))
             st.markdown(r"Arrival Times (counts)")
             table_in = dashboard.min_max_columns("ATS", (0.0, 1000000000))
             nitable = querymission(table_in, "NICER")
