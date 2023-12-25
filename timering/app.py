@@ -280,14 +280,7 @@ def main(pargs: argparse.Namespace):
             obsouts = st.multiselect("OBSID Exclusions", dashboard.obsids)
             st.session_state.obsouts = obsouts
             st.markdown(r"$\nu$ Error (hz)")
-            set3, set4 = st.columns(2)
-            with set3:
-                minerr = st.text_input("Min Error", value=0.0)
-                logger.debug(f"Min Error set to {minerr}")
-            with set4:
-                maxerr = st.text_input("Max Error", value=1.0)
-                logger.debug(f"Max Eror set to {maxerr}")
-            table_in = dashboard.min_max_filters("NU_ERR", minerr, maxerr)
+            table_in = dashboard.min_max_columns("NU_ERR", (0.0, 1.0))
             minzn2 = st.text_input("Min $Z_n^2$", value=30.0)
             table_in = filtermin(table_in, "ZN2", minzn2)
             st.markdown(r"$\nu$ Gaussian Fit Error (hz)")
