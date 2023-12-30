@@ -242,6 +242,10 @@ def main(pargs: argparse.Namespace):
                         level=level)
     logger = logging.getLogger(TIMERING)
 
+    st.set_page_config(page_title='X-ray Timering',
+                       page_icon="",
+                       initial_sidebar_state='auto')
+
     if "show_df" not in st.session_state:
         st.session_state.show_df = False
     dashboard = Dashboard(pargs, logger)
