@@ -406,6 +406,7 @@ def main(pargs: argparse.Namespace):
             with phasecurve:
                 st.pyplot(rplots["Phase"][num])
     with st.expander("More Info On Individual Results"):
+        st.image("timering/pics/interval-example.png")
         st.markdown(messages.iresult_info())
 
     st.divider()
