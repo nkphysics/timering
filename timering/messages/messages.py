@@ -132,3 +132,12 @@ def heasarc_credit():
             which is a service of the Astrophysics Science Division at NASA/GSFC.
             """)   
     return info
+
+
+def sidebar_footer():
+    info = ("""
+            If you find any of the data and/or dashboard features 
+            useful in your projects or work, please consider acknowledging
+            *Nicholas Kuechel* and reaching out.
+            """)
+    return info

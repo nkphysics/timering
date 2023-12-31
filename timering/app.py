@@ -418,6 +418,9 @@ def main(pargs: argparse.Namespace):
     st.markdown(messages.heasarc_credit())
     st.markdown(messages.poweredby())
 
+    with st.sidebar:
+        st.markdown(messages.sidebar_footer())
+
 
 if __name__ == "__main__":
     pargs = parseargs()
