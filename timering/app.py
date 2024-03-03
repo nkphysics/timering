@@ -205,6 +205,7 @@ class Dashboard:
                                      self.con,
                                      parse_dates=["TIME"])
         table_in = table_in.sort_values(by="TIME")
+        table_in.drop(columns="EVTID", axis=1, inplace=True)
         return table_in
 
     def min_max_filters(self, column: str, minval: float,
@@ -372,21 +373,13 @@ def main(pargs: argparse.Namespace):
             st.markdown(messages.crabtime_credit())
 
     try:
-        nif = pd.read_sql("SELECT NICER.OBSID, NICER.TWR_FILE FROM NICER " +
-                          "WHERE NICER.TWR_FILE IS NOT NULL", dashboard.con)
+        mif = pd.read_sql("SELECT missions.OBSID, missions.TWR_FILE FROM missions " +
+                          "WHERE missions.TWR_FILE IS NOT NULL", dashboard.con)
     except pd.errors.DatabaseError:
-        logger.warning("No NICER Table Found")
-        nif = pd.DataFrame({"OBSID": []})
+        logger.warning("No missions Table Found")
+        mif = pd.DataFrame({"OBSID": []})
 
-    try:
-        xtef = pd.read_sql("SELECT XTE.OBSID, XTE.TWR_FILE FROM XTE " +
-                           "WHERE XTE.TWR_FILE IS NOT NULL", dashboard.con)
-    except pd.errors.DatabaseError:
-        logger.warning("No XTE Table Found")
-        xtef = pd.DataFrame({"OBSID": []})
-
-    resdf = pd.merge(nif, xtef, how="outer")
-    resdf = pd.merge(resdf, table_in, how="inner", on="OBSID")
+    resdf = pd.merge(mif, table_in, how="inner", on="OBSID")
     resdf = resdf.drop_duplicates(subset=["OBSID"])
     st.divider()
 
