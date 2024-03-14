@@ -258,7 +258,7 @@ def main(pargs: argparse.Namespace):
         alias = dashboard.sources[dashboard.srcsel]["alias"]
         st.markdown(f"**Aliases:** {alias}")
     except KeyError:
-        logger.debug("No aliases for {dashboard.srcsel}")
+        logger.debug(f"No aliases for {dashboard.srcsel}")
     table_in = dashboard.nuresults
     unfiltereddf = table_in.copy()
     with st.sidebar:
