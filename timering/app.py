@@ -81,6 +81,14 @@ def filter_obsidout(table, obsid):
     return table
 
 
+def filter_ridout(table, rid):
+    """
+    Filters out RID column of input table
+    """
+    table = table.loc[table["RID"] != rid]
+    return table
+
+
 def getcrabtime():
     """
     Retrieves the CRABTIME database (Crab Pulsar Monthly
