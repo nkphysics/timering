@@ -292,6 +292,9 @@ def main(pargs: argparse.Namespace):
                 logger.debug(f"NICER Interval Mode set to {nicerintmode}")
             obsouts = st.multiselect("OBSID Exclusions", dashboard.obsids)
             st.session_state.obsouts = obsouts
+            ridouts = st.multiselect("ResultID (RID) Exclusions",
+                                     table_in["RID"])
+            st.session_state.ridouts = ridouts
             st.markdown(r"$\nu$ Error (hz)")
             table_in = dashboard.min_max_columns("NU_ERR", (0.0, 1.0))
             minzn2 = st.text_input("Min $Z_n^2$", value=30.0)
@@ -309,6 +312,8 @@ def main(pargs: argparse.Namespace):
             table_in = pd.merge(xtetable, nitable, how="outer")
             for i in obsouts:
                 table_in = filter_obsidout(table_in, i)
+            for i in ridouts:
+                table_in = filter_ridout(table_in, i)
     table_in = table_in.sort_values(by="TIME")
     st.session_state.show_df = show_df
     st.markdown(r"## $\nu$ Evolution")
