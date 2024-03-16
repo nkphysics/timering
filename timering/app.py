@@ -393,9 +393,7 @@ def main(pargs: argparse.Namespace):
         mif = pd.DataFrame({"OBSID": []})
 
     resdf = pd.merge(mif, table_in, how="inner", on="OBSID")
-    resdf = resdf.drop_duplicates(subset=["OBSID"])
     st.divider()
-
     st.markdown("# Individual Measurements")
     obsid = st.selectbox("OBSID", resdf["OBSID"])
     obsid_filt = resdf.loc[resdf["OBSID"] == obsid]
@@ -406,10 +404,8 @@ def main(pargs: argparse.Namespace):
         rplots = plotting.obsid_plots(f'data/{obsid_filt["TWR_FILE"][0]}')
     for num, fig in enumerate(rplots["ZN2"]):
         if fig is not False:
-            if num <= 0:
-                st.markdown("### Full")
-            else:
-                st.markdown(f"### Interval {num}")
+            rid = obsid_filt["RID"][num]
+            st.markdown(f"### Result ID {rid}")
             sluicing, phasecurve = st.columns(2)
             with sluicing:
                 st.pyplot(rplots["ZN2"][num])
