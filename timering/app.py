@@ -259,7 +259,7 @@ def main(pargs: argparse.Namespace):
         st.session_state.show_df = False
     dashboard = Dashboard(pargs, logger)
     with st.sidebar:
-        show_df = st.toggle("Show Data Table")
+        show_df = st.toggle("Show Data Table", value=True)
     st.markdown(f"# {dashboard.active_src}")
 
     try:
