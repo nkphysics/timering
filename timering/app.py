@@ -393,9 +393,10 @@ def main(pargs: argparse.Namespace):
         mif = pd.DataFrame({"OBSID": []})
 
     resdf = pd.merge(mif, table_in, how="inner", on="OBSID")
+    resdf_nodups = resdf.drop_duplicates(subset=["OBSID"])
     st.divider()
     st.markdown("# Individual Measurements")
-    obsid = st.selectbox("OBSID", resdf["OBSID"])
+    obsid = st.selectbox("OBSID", resdf_nodups["OBSID"])
     obsid_filt = resdf.loc[resdf["OBSID"] == obsid]
     obsid_filt.reset_index(drop=True, inplace=True)
     if pargs.local:
