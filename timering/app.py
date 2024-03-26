@@ -392,7 +392,7 @@ def main(pargs: argparse.Namespace):
         logger.warning("No missions Table Found")
         mif = pd.DataFrame({"OBSID": []})
 
-    resdf = pd.merge(mif, table_in, how="inner", on="OBSID")
+    resdf = pd.merge(mif, unfiltereddf, how="inner", on="OBSID")
     resdf_nodups = resdf.drop_duplicates(subset=["OBSID"])
     st.divider()
     st.markdown("# Individual Measurements")
