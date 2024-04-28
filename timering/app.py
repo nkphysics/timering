@@ -256,6 +256,14 @@ class Dashboard:
         table_in = self.min_max_filters(column, minval, maxval)
         return table_in
 
+    def interval_mode_filter(self, column: str):
+        intmode = st.selectbox(column,
+                               options=["all", "full", "gti"]
+                               )
+        self.logger.debug(f"{column} Interval Mode set to {intmode}")
+        self.nuevo_filters[f"{column}_interval_mode"] = intmode
+        return intmode
+
 
 def main(pargs: argparse.Namespace):
     level = logging.WARNING
@@ -295,15 +303,9 @@ def main(pargs: argparse.Namespace):
             st.markdown("Interval Modes:")
             set1, set2 = st.columns(2)
             with set1:
-                xteintmode = st.selectbox("XTE",
-                                          options=["all", "full", "gti"]
-                                          )
-                logger.debug(f"XTE Interval Mode set to {xteintmode}")
+                xteintmode = dashboard.interval_mode_filter("XTE")
             with set2:
-                nicerintmode = st.selectbox("NICER",
-                                            options=["all", "full", "gti"]
-                                            )
-                logger.debug(f"NICER Interval Mode set to {nicerintmode}")
+                nicerintmode = dashboard.interval_mode_filter("NICER")
             obsouts = st.multiselect("OBSID Exclusions", dashboard.obsids)
             st.session_state.obsouts = obsouts
             ridouts = st.multiselect("ResultID (RID) Exclusions",
