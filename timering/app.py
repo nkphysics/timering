@@ -157,6 +157,13 @@ def makecsv(df):
     return df.to_csv().encode('utf-8')
 
 
+def settingsdump(settingdict: dict):
+    """
+    Dumps settings dict into a json file
+    """
+    return json.dumps(settingdict, indent=4)
+
+
 class Dashboard:
 
     def __init__(self, pargs, logger):
@@ -228,6 +235,13 @@ class Dashboard:
                            data=csvdata,
                            file_name=f"{self.active_src}.csv",
                            mime='text/csv')
+
+    def downloadsettings(self) -> None:
+        jsonsettings = settingsdump(self.nuevo_filters)
+        st.download_button(label="Download Settings",
+                           data=jsonsettings,
+                           file_name=f"{self.srcsel}-settings.json",
+                           mime="application/json")
 
     def min_max_columns(self, column: str, default: tuple):
         seta, setb = st.columns(2)
@@ -314,6 +328,7 @@ def main(pargs: argparse.Namespace):
                 table_in = filter_obsidout(table_in, i)
             for i in ridouts:
                 table_in = filter_ridout(table_in, i)
+            dashboard.downloadsettings()
     table_in = table_in.sort_values(by="TIME")
     st.session_state.show_df = show_df
     st.markdown(r"## $\nu$ Evolution")
