@@ -264,6 +264,11 @@ class Dashboard:
         self.nuevo_filters[f"{column}_interval_mode"] = intmode
         return intmode
 
+    def exclusion_filter(self, columndata, name: str):
+        exclusions = st.multiselect(name, columndata)
+        self.nuevo_filters[name] = exclusions
+        return exclusions
+
 
 def main(pargs: argparse.Namespace):
     level = logging.WARNING
@@ -306,10 +311,11 @@ def main(pargs: argparse.Namespace):
                 xteintmode = dashboard.interval_mode_filter("XTE")
             with set2:
                 nicerintmode = dashboard.interval_mode_filter("NICER")
-            obsouts = st.multiselect("OBSID Exclusions", dashboard.obsids)
+            obsouts = dashboard.exclusion_filter(dashboard.obsids,
+                                                 "OBSID Exclusions")
             st.session_state.obsouts = obsouts
-            ridouts = st.multiselect("ResultID (RID) Exclusions",
-                                     table_in["RID"])
+            ridouts = dashboard.exclusion_filter(table_in["RID"],
+                                                 "ResultID (RID) Exclusions")
             st.session_state.ridouts = ridouts
             st.markdown(r"$\nu$ Error (hz)")
             table_in = dashboard.min_max_columns("NU_ERR", (0.0, 1.0))
