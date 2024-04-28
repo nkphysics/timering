@@ -409,8 +409,10 @@ def main(pargs: argparse.Namespace):
             st.markdown(messages.crabtime_credit())
 
     try:
-        mif = pd.read_sql("SELECT missions.OBSID, missions.TWR_FILE FROM missions " +
-                          "WHERE missions.TWR_FILE IS NOT NULL", dashboard.con)
+        mif = pd.read_sql(("SELECT missions.OBSID, missions.TWR_FILE "
+                           "FROM missions "
+                           "WHERE missions.TWR_FILE IS NOT NULL"),
+                          dashboard.con)
     except pd.errors.DatabaseError:
         logger.warning("No missions Table Found")
         mif = pd.DataFrame({"OBSID": []})
