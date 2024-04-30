@@ -170,7 +170,7 @@ class Dashboard:
         self.logger = logger
         self.sources = []
         self.srcsel = ""
-        self.dbpath = self.catalog_options_parsing()
+        self.dbpath, self.settings = self.catalog_options_parsing()
         self.con = self.connect_twdb()
         self.active_src = self.get_src()
         self.obsids = self.get_obsids()
@@ -189,12 +189,16 @@ class Dashboard:
                 dbpath_in = st.text_input("Local database path",
                                           value=pargs.database)
                 dbpath = pathlib.Path(dbpath_in).resolve()
+                settings = st.text_input("Filter settings", value=None)
+                settings = pathlib.Path(settings).resolve()
             else:
                 self.sources = parse_config(pargs.config)
                 self.srcsel = st.selectbox("Source", self.sources)
                 dbpath = pathlib.Path(self.sources[self.srcsel]
                                                   ["database"]).resolve()
-            return dbpath
+                settings = pathlib.Path(self.sources[self.srcsel]
+                                                    ["settings"]).resolve()
+            return dbpath, settings
 
     def connect_twdb(self):
         try:
