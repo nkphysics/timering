@@ -175,7 +175,20 @@ class Dashboard:
         self.active_src = self.get_src()
         self.obsids = self.get_obsids()
         self.nuresults = self.get_nuresults()
-        self.nuevo_filters = {}
+        self.nuevo_filters = {
+            "XTE_interval_mode": "all",
+            "NICER_interval_mode": "all",
+            "OBSID Exclusions": [],
+            "ResultID (RID) Exclusions": [],
+            "min_NU_ERR": "0.0",
+            "max_NU_ERR": "1.0",
+            "min_G_NU_ERR": "-0.1",
+            "max_G_NU_ERR": "1.0",
+            "min_EXPOSURE": "0.0",
+            "max_EXPOSURE": "1000000",
+            "min_ATS": "0.0",
+            "max_ATS": "1000000000"
+        }
 
     def catalog_options_parsing(self):
         """
@@ -196,9 +209,17 @@ class Dashboard:
                 self.srcsel = st.selectbox("Source", self.sources)
                 dbpath = pathlib.Path(self.sources[self.srcsel]
                                                   ["database"]).resolve()
-                settings = pathlib.Path(self.sources[self.srcsel]
-                                                    ["settings"]).resolve()
+                try:
+                    settings = pathlib.Path(self.sources[self.srcsel]
+                                                        ["settings"]).resolve()
+                except KeyError:
+                    settings = False
             return dbpath, settings
+
+    def load_settings(self) -> None:
+        with open(self.settings, 'r') as f:
+            self.nuevo_filters = json.load(f)
+        self.logger.debug(f"Settings loaded from {self.settings}.")
 
     def connect_twdb(self):
         try:
@@ -291,6 +312,10 @@ def main(pargs: argparse.Namespace):
     dashboard = Dashboard(pargs, logger)
     with st.sidebar:
         show_df = st.toggle("Show Data Table", value=True)
+        if dashboard.settings is not False:
+            preset_filters = st.toggle("Use Established Filters", value=True)
+            if preset_filters is True:
+                dashboard.load_settings()
     st.markdown(f"# {dashboard.active_src}")
 
     try:
