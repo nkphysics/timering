@@ -282,15 +282,20 @@ class Dashboard:
         return table_in
 
     def interval_mode_filter(self, column: str):
+        name = f"{column}_interval_mode"
+        options = ["all", "full", "gti"]
+        default = options.index(self.nuevo_filters[name])
         intmode = st.selectbox(column,
-                               options=["all", "full", "gti"]
-                               )
+                               options=["all", "full", "gti"],
+                               index=default)
         self.logger.debug(f"{column} Interval Mode set to {intmode}")
-        self.nuevo_filters[f"{column}_interval_mode"] = intmode
+        self.nuevo_filters[name] = intmode
         return intmode
 
     def exclusion_filter(self, columndata, name: str):
-        exclusions = st.multiselect(name, columndata)
+        exclusions = st.multiselect(name,
+                                    options=columndata,
+                                    default=self.nuevo_filters[name])
         self.nuevo_filters[name] = exclusions
         return exclusions
 
@@ -316,6 +321,7 @@ def main(pargs: argparse.Namespace):
             preset_filters = st.toggle("Use Established Filters", value=True)
             if preset_filters is True:
                 dashboard.load_settings()
+    filters = dashboard.nuevo_filters
     st.markdown(f"# {dashboard.active_src}")
 
     try:
@@ -347,14 +353,18 @@ def main(pargs: argparse.Namespace):
                                                  "ResultID (RID) Exclusions")
             st.session_state.ridouts = ridouts
             st.markdown(r"$\nu$ Error (hz)")
-            table_in = dashboard.min_max_columns("NU_ERR", (0.0, 1.0))
+            nu_err_bounds = (filters["min_NU_ERR"], filters["max_NU_ERR"])
+            table_in = dashboard.min_max_columns("NU_ERR", nu_err_bounds)
             minzn2 = st.text_input("Min $Z_n^2$", value=30.0)
             st.markdown(r"$\nu$ Gaussian Fit Error (hz)")
-            table_in = dashboard.min_max_columns("G_NU_ERR", (-0.1, 1.0))
+            gnu_bounds = (filters["min_G_NU_ERR"], filters["max_G_NU_ERR"])
+            table_in = dashboard.min_max_columns("G_NU_ERR", gnu_bounds)
             st.markdown(r"Exposure (s)")
-            table_in = dashboard.min_max_columns("EXPOSURE", (0.0, 1000000))
+            expo_bounds = (filters["min_EXPOSURE"], filters["max_EXPOSURE"])
+            table_in = dashboard.min_max_columns("EXPOSURE", expo_bounds)
+            ats_bounds = (filters["min_ATS"], filters["max_ATS"])
             st.markdown(r"Arrival Times (counts)")
-            table_in = dashboard.min_max_columns("ATS", (0.0, 1000000000))
+            table_in = dashboard.min_max_columns("ATS", ats_bounds)
             table_in = filtermin(table_in, "ZN2", minzn2)
             nitable = querymission(table_in, "NICER")
             nitable = filter_intmode(nitable, nicerintmode)
