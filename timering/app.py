@@ -68,11 +68,6 @@ def filtermax(table, column, maxbound):
     return table
 
 
-def filtermin(table, column, minbound):
-    table = table.loc[table[column] >= float(minbound)]
-    return table
-
-
 def filter_obsidout(table, obsid):
     """
     Filters out the input table of a specific OBSID
@@ -248,10 +243,16 @@ class Dashboard:
         table_in.drop(columns="EVTID", axis=1, inplace=True)
         return table_in
 
+    def filtermin(self, table, column, minbound):
+        table = table.loc[table[column] >= float(minbound)]
+        self.nuevo_filters[f"min_{column}"] = minbound
+        self.logger.debug(f"Min {column} set to {minbound}")
+        return table
+
     def min_max_filters(self, column: str, minval: float,
                         maxval: float):
         self.nuresults = filtermax(self.nuresults, column, maxval)
-        self.nuresults = filtermin(self.nuresults, column, minval)
+        self.nuresults = self.filtermin(self.nuresults, column, minval)
         return self.nuresults
 
     def downloadcsv(self, data, label: str) -> None:
@@ -272,8 +273,6 @@ class Dashboard:
         seta, setb = st.columns(2)
         with seta:
             minval = st.text_input(f"Min {column}", value=default[0])
-            self.nuevo_filters[f"min_{column}"] = minval
-            self.logger.debug(f"Min {column} set to {minval}")
         with setb:
             maxval = st.text_input(f"Max {column}", value=default[1])
             self.nuevo_filters[f"max_{column}"] = maxval
@@ -365,7 +364,7 @@ def main(pargs: argparse.Namespace):
             ats_bounds = (filters["min_ATS"], filters["max_ATS"])
             st.markdown(r"Arrival Times (counts)")
             table_in = dashboard.min_max_columns("ATS", ats_bounds)
-            table_in = filtermin(table_in, "ZN2", minzn2)
+            table_in = dashboard.filtermin(table_in, "ZN2", minzn2)
             nitable = querymission(table_in, "NICER")
             nitable = filter_intmode(nitable, nicerintmode)
             xtetable = querymission(table_in, "XTE")
