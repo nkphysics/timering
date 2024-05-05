@@ -63,11 +63,6 @@ def filter_intmode(table, intmode):
     return modetable
 
 
-def filtermax(table, column, maxbound):
-    table = table.loc[table[column] <= float(maxbound)]
-    return table
-
-
 def filter_obsidout(table, obsid):
     """
     Filters out the input table of a specific OBSID
@@ -249,9 +244,15 @@ class Dashboard:
         self.logger.debug(f"Min {column} set to {minbound}")
         return table
 
+    def filtermax(self, table, column, maxbound):
+        table = table.loc[table[column] <= float(maxbound)]
+        self.nuevo_filters[f"max_{column}"] = maxbound
+        self.logger.debug(f"Max {column} set to {maxbound}")
+        return table
+
     def min_max_filters(self, column: str, minval: float,
                         maxval: float):
-        self.nuresults = filtermax(self.nuresults, column, maxval)
+        self.nuresults = self.filtermax(self.nuresults, column, maxval)
         self.nuresults = self.filtermin(self.nuresults, column, minval)
         return self.nuresults
 
@@ -275,8 +276,6 @@ class Dashboard:
             minval = st.text_input(f"Min {column}", value=default[0])
         with setb:
             maxval = st.text_input(f"Max {column}", value=default[1])
-            self.nuevo_filters[f"max_{column}"] = maxval
-            self.logger.debug(f"Max {column} set to {maxval}")
         table_in = self.min_max_filters(column, minval, maxval)
         return table_in
 
