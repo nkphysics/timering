@@ -461,6 +461,7 @@ def main(pargs: argparse.Namespace):
     obsid = st.selectbox("OBSID", resdf_nodups["OBSID"])
     obsid_filt = resdf.loc[resdf["OBSID"] == obsid]
     obsid_filt.reset_index(drop=True, inplace=True)
+    exclude = resdf[~resdf.RID.isin(table_in.RID)].reset_index(drop=True)
     if pargs.local:
         rplots = plotting.obsid_plots(obsid_filt["TWR_FILE"][0])
     else:
@@ -468,7 +469,10 @@ def main(pargs: argparse.Namespace):
     for num, fig in enumerate(rplots["ZN2"]):
         if fig is not False:
             rid = obsid_filt["RID"][num]
-            st.markdown(f"### Result ID {rid}")
+            if rid in exclude.RID.values:
+                st.markdown(f"### Result ID {rid} (Filtered Out)")
+            else:
+                st.markdown(f"### Result ID {rid}")
             sluicing, phasecurve = st.columns(2)
             with sluicing:
                 st.pyplot(rplots["ZN2"][num])
